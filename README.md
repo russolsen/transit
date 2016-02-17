@@ -1,4 +1,4 @@
-# transit-go
+# transit
 
 Note that this readme file along with the rest of transit-go is very much a work-in-progress.
 
