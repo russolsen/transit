@@ -1,4 +1,7 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
+// 
+// This code is a Go port of the Java version created and maintained by Cognitect, therefore:
+//
 // Copyright 2014 Cognitect. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +15,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Much of this file was adopted from the Cognitect Java transit implementation.
 
 package transit
 

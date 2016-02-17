@@ -1,6 +1,6 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
 // 
-// This code is a C# port of the Java version created and maintained by Cognitect, therefore:
+// This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
 //
