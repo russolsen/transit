@@ -60,7 +60,7 @@ func DecodeTaggedValue(d Decoder, x interface{}) (interface{}, error) {
 	return x, nil
 }
 
-
+// DecodeCMap decodes maps with composite keys.
 func DecodeCMap(d Decoder, x interface{}) (interface{}, error) {
 	array := x.(TaggedValue).Value.([]interface{})
 

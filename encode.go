@@ -83,6 +83,13 @@ func NewEncoder(w io.Writer) *Encoder {
 
 	e.addHandler(reflect.Map, NewMapEncoder())
 
+	// big integer
+	// big decimal
+	// time
+	// uuid
+	// special numbers?
+	// Char
+
 	e.addHandler(goListType, NewListEncoder())
 	e.addHandler(symbolType, NewSymbolEncoder())
 	e.addHandler(keywordType, NewKeywordEncoder())
