@@ -20,8 +20,19 @@ package transit
 
 import (
 	"github.com/russolsen/ohyeah"
+	"github.com/pborman/uuid"
 	"testing"
 )
+
+var Uuids = []interface{}{
+	uuid.Parse("EC5A75-A0F3-4166-AE54-6498C5063042"),
+	uuid.Parse("6E4BA181-E528-4676-84A2-87974DEBBE90"),
+	uuid.Parse("D5E0D599-83F1-47E9-9A27-73E4131590E8")}
+
+func UuidGen(r ohyeah.Int64F,) ohyeah.Generator {
+	return ohyeah.ElementGen(r, Uuids)
+}
+
 
 func KeywordGen(stringGenerator ohyeah.Generator) ohyeah.Generator {
 	return func() interface{} {
@@ -55,6 +66,7 @@ func TestGeneratedMaps(t *testing.T) {
 	vg := ohyeah.CycleGen(ohyeah.IntGen(r), ohyeah.ConstantGen(1234500),
 		symg,
 		keyg,
+		UuidGen(r),
 		ohyeah.PatternedStringGen(r, "val"),
 		ohyeah.ConstantGen(Keyword("hello")))
 

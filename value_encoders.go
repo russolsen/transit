@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"reflect"
 	"math/big"
+	"github.com/pborman/uuid"
 )
 
 // ValueEncoder is the interface for objects that know how to
@@ -62,6 +63,23 @@ func (ie PointerEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	//log.Println("*** Defer pointer to:", v.Elem())
 	return e.EncodeInterface(v.Elem().Interface(), asKey)
 }
+
+
+type UuidEncoder struct{}
+
+func NewUuidEncoder() *UuidEncoder {
+	return &UuidEncoder{}
+}
+
+func (ie UuidEncoder) IsStringable(v reflect.Value) bool {
+	return true
+}
+
+func (ie UuidEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	u := v.Interface().(uuid.UUID)
+	return e.emitter.EmitString(fmt.Sprintf("~u%v", u.String()), asKey)
+}
+
 
 type BoolEncoder struct{}
 
@@ -122,7 +140,8 @@ func (ie BigIntEncoder) IsStringable(v reflect.Value) bool {
 }
 
 func (ie BigIntEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
-	return e.emitter.EmitString(fmt.Sprintf("~n%v", v), asKey)
+	i := v.Interface().(big.Int)
+	return e.emitter.EmitString(fmt.Sprintf("~n%v", i.String()), asKey)
 }
 
 
