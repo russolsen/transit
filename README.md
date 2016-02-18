@@ -1,4 +1,4 @@
-# transit
+# transit (go)
 
 Note that this readme file along with the rest of transit-go is very much a work-in-progress.
 
@@ -16,13 +16,70 @@ _NOTE: Transit is a work in progress and may evolve based on feedback. As a resu
 
 ## Usage
 
+Reading data with Transit(go) involves creating a `transit.Decoder` and calling `Decode`:
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"github.com/russolsen/transit"
+)
+
+func ReadTransit(path string) interface{} {
+	f, err := os.Open(path)
+
+	if err != nil {
+		fmt.Printf("Error opening file: %v\n", err)
+		return nil
+	}
+
+	decoder := transit.NewDecoder(f)
+
+	value, err := decoder.Decode()
+
+	if err != nil {
+		fmt.Printf("Error reading Transit data: %v\n", err)
+		return nil
+	}
+
+	fmt.Printf("The value read is: %v\n", value)
+
+	return value
+}
+```
+
+Writing is similar:
+
+```go
+func WriteTransit(path string, value interface{}) {
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+
+	if err != nil {
+		fmt.Printf("Error opening file: %v\n", err)
+		return
+	}
+
+	encoder := transit.NewEncoder(f)
+
+	err = encoder.Encode(value)
+
+	if err != nil {
+		fmt.Printf("Error writing Transit data: %v\n", err)
+		return
+	}
+}
+```
+
+
 ## Default Type Mapping
 
 | Semantic Type | write accepts | read produces |
 |:--------------|:--------------|:--------------|
 | null| nil | nil |
 | string| string | string |
-| boolean | boolean| boolean |
+| boolean | bool| bool |
 | integer, signed 64 bit| any signed or unsiged int type | int64 |
 | floating pt decimal| float32 or float64 | float64 |
 | bytes| []byte | []byte |
