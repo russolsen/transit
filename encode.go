@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"reflect"
 	"math/big"
+	"github.com/pborman/uuid"
 )
 
 type Encoder struct {
@@ -43,6 +44,7 @@ var setType = reflect.TypeOf(Set{})
 
 var bigIntType = reflect.TypeOf(*big.NewInt(int64(1)))
 var bigFloatType = reflect.TypeOf(*big.NewFloat(float64(1.)))
+var uuidType = reflect.TypeOf(uuid.NewRandom())
 
 var nilValue = reflect.ValueOf(nil)
 var nilEncoder = NewNilEncoder()
@@ -88,13 +90,12 @@ func NewEncoder(w io.Writer) *Encoder {
 	e.addHandler(reflect.Map, NewMapEncoder())
 
 
-	// big integer
-	// big decimal
 	// time
 	// uuid
 	// special numbers?
 	// Char
 
+	e.addHandler(uuidType, NewUuidEncoder())
 	e.addHandler(bigIntType, NewBigIntEncoder())
 	e.addHandler(bigFloatType, NewBigDecimalEncoder())
 	e.addHandler(goListType, NewListEncoder())
