@@ -24,6 +24,7 @@ import (
 	"log"
 	"net/url"
 	"reflect"
+	"math/big"
 )
 
 // ValueEncoder is the interface for objects that know how to
@@ -91,6 +92,39 @@ func (ie FloatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	f := v.Float()
 	return e.emitter.EmitFloat(f, asKey)
 }
+
+
+
+type BigDecimalEncoder struct{}
+
+func NewBigDecimalEncoder() *BigDecimalEncoder {
+	return &BigDecimalEncoder{}
+}
+
+func (ie BigDecimalEncoder) IsStringable(v reflect.Value) bool {
+	return true
+}
+
+func (ie BigDecimalEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	f := v.Interface().(big.Float)
+	return e.emitter.EmitString(f.Text('f', 25), asKey)
+}
+
+
+type BigIntEncoder struct{}
+
+func NewBigIntEncoder() *BigIntEncoder {
+	return &BigIntEncoder{}
+}
+
+func (ie BigIntEncoder) IsStringable(v reflect.Value) bool {
+	return true
+}
+
+func (ie BigIntEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	return e.emitter.EmitString(fmt.Sprintf("~n%v", v), asKey)
+}
+
 
 type IntEncoder struct{}
 

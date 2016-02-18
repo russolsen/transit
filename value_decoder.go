@@ -195,7 +195,7 @@ func DecodeDecimal(d Decoder, x interface{}) (interface{}, error) {
 // DecodeRatio decodes a transit big decimal into an float64.
 func DecodeBigDecimal(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
-	result, _, _ := big.ParseFloat(s, 10, 20, big.ToZero)
+	result, _, _ := big.ParseFloat(s, 10, 25, big.ToZero)
 	return result, nil
 }
 

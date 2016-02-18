@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/url"
 	"reflect"
+	"math/big"
 )
 
 type Encoder struct {
@@ -39,6 +40,9 @@ var cmapType = reflect.TypeOf(NewCMap())
 var aUrl, _ = url.Parse("http://foo.com")
 var urlType = reflect.TypeOf(aUrl)
 var setType = reflect.TypeOf(Set{})
+
+var bigIntType = reflect.TypeOf(*big.NewInt(int64(1)))
+var bigFloatType = reflect.TypeOf(*big.NewFloat(float64(1.)))
 
 var nilValue = reflect.ValueOf(nil)
 var nilEncoder = NewNilEncoder()
@@ -83,6 +87,7 @@ func NewEncoder(w io.Writer) *Encoder {
 
 	e.addHandler(reflect.Map, NewMapEncoder())
 
+
 	// big integer
 	// big decimal
 	// time
@@ -90,6 +95,8 @@ func NewEncoder(w io.Writer) *Encoder {
 	// special numbers?
 	// Char
 
+	e.addHandler(bigIntType, NewBigIntEncoder())
+	e.addHandler(bigFloatType, NewBigDecimalEncoder())
 	e.addHandler(goListType, NewListEncoder())
 	e.addHandler(symbolType, NewSymbolEncoder())
 	e.addHandler(keywordType, NewKeywordEncoder())
