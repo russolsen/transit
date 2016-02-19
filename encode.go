@@ -26,6 +26,7 @@ import (
 	"reflect"
 	"math/big"
 	"github.com/pborman/uuid"
+	"time"
 )
 
 type Encoder struct {
@@ -42,10 +43,12 @@ var aUrl, _ = url.Parse("http://foo.com")
 var urlType = reflect.TypeOf(aUrl)
 var setType = reflect.TypeOf(Set{})
 
+var timeType = reflect.TypeOf(time.Now())
 var bigIntType = reflect.TypeOf(*big.NewInt(int64(1)))
 var bigFloatType = reflect.TypeOf(*big.NewFloat(float64(1.)))
 var uuidType = reflect.TypeOf(uuid.NewRandom())
 
+var runeType = reflect.TypeOf('x')
 var nilValue = reflect.ValueOf(nil)
 var nilEncoder = NewNilEncoder()
 
@@ -90,11 +93,11 @@ func NewEncoder(w io.Writer) *Encoder {
 	e.addHandler(reflect.Map, NewMapEncoder())
 
 
-	// time
-	// uuid
-	// special numbers?
 	// Char
+	// Link
 
+	e.addHandler(runeType, NewRuneEncoder())
+	e.addHandler(timeType, NewTimeEncoder())
 	e.addHandler(uuidType, NewUuidEncoder())
 	e.addHandler(bigIntType, NewBigIntEncoder())
 	e.addHandler(bigFloatType, NewBigDecimalEncoder())

@@ -48,7 +48,7 @@ func NewDecoder(r io.Reader) *Decoder {
 	d.AddHandler("i", DecodeInteger)
 	d.AddHandler("n", DecodeBigInteger)
 	d.AddHandler("f", DecodeBigDecimal)
-	d.AddHandler("c", DecodeChar)
+	d.AddHandler("c", DecodeRune)
 	d.AddHandler("$", DecodeSymbol)
 	d.AddHandler("t", DecodeRFC3339)
 	d.AddHandler("m", DecodeTime)
@@ -62,14 +62,7 @@ func NewDecoder(r io.Reader) *Decoder {
 	d.AddHandler("list", DecodeList)
 	d.AddHandler("cmap", DecodeCMap)
 	d.AddHandler("ratio", DecodeRatio)
-
-	//d.AddHandler(RESERVED, DecodeReserved)
-	//d.AddHandler(SUB_STR, DecodeSub)
-//	d.AddHandler("#", DecodeTag)
-//	d.AddHandler("~", DecodeTilde)
-
-	d.AddHandler("tag_decoder", DecodeTaggedValue)
-	d.AddHandler("unknown", DecodeUnknown)
+	d.AddHandler("unknown", DecodeIdentity)
 
 	return &d
 }
@@ -83,16 +76,18 @@ func (d Decoder) ParseString(s string) (interface{}, error) {
 	if d.Cache.HasKey(s) {
 		return d.Parse(d.Cache.Read(s), false)
 
-	} else if ! strings.HasPrefix(s, "~") {
+	} else if ! strings.HasPrefix(s, START) {
 		return s, nil
 
-	} else if strings.HasPrefix(s, "~#") {
+	} else if strings.HasPrefix(s, START_TAG) {
 		return TagId(s[2:]), nil
 
 	} else if vd := d.decoders[s[1:2]]; vd != nil {
 		return vd(d, s[2:])
 
-	} else if strings.HasPrefix(s, "~~") || strings.HasPrefix(s, "~^") || strings.HasPrefix(s, "~`") {
+	} else if strings.HasPrefix(s, ESCAPE_TAG) || 
+		strings.HasPrefix(s, ESCAPE_SUB) || 
+		strings.HasPrefix(s, ESCAPE_RES) {
 		return s[1:], nil
 
 	} else {

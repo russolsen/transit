@@ -24,8 +24,10 @@ import (
 	"log"
 	"net/url"
 	"reflect"
+	"math"
 	"math/big"
 	"github.com/pborman/uuid"
+	"time"
 )
 
 // ValueEncoder is the interface for objects that know how to
@@ -48,6 +50,23 @@ func (ie NilEncoder) IsStringable(v reflect.Value) bool {
 func (ie NilEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitNil(asKey)
 }
+
+
+type RuneEncoder struct{}
+
+func NewRuneEncoder() *RuneEncoder {
+	return &RuneEncoder{}
+}
+
+func (ie RuneEncoder) IsStringable(v reflect.Value) bool {
+	return true
+}
+
+func (ie RuneEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	r := v.Interface().(rune)
+	return e.emitter.EmitString(fmt.Sprintf("~c%c", r), asKey)
+}
+
 
 type PointerEncoder struct{}
 
@@ -81,6 +100,25 @@ func (ie UuidEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 }
 
 
+type TimeEncoder struct{}
+
+func NewTimeEncoder() *TimeEncoder {
+	return &TimeEncoder{}
+}
+
+func (ie TimeEncoder) IsStringable(v reflect.Value) bool {
+	return true
+}
+
+func (ie TimeEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	t := v.Interface().(time.Time)
+	nanos := t.UnixNano()
+	millis := nanos / int64(1000)
+	return e.emitter.EmitString(fmt.Sprintf("~m%d", millis), asKey)
+}
+
+
+
 type BoolEncoder struct{}
 
 func NewBoolEncoder() *BoolEncoder {
@@ -96,6 +134,8 @@ func (ie BoolEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitBool(b, asKey)
 }
 
+
+
 type FloatEncoder struct{}
 
 func NewFloatEncoder() *FloatEncoder {
@@ -108,7 +148,15 @@ func (ie FloatEncoder) IsStringable(v reflect.Value) bool {
 
 func (ie FloatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	f := v.Float()
-	return e.emitter.EmitFloat(f, asKey)
+	if math.IsNaN(f) {
+		return e.emitter.EmitString("~zNaN", asKey)
+	} else if math.IsInf(f, 1) {
+		return e.emitter.EmitString("~zINF", asKey)
+	} else if math.IsInf(f, -1) {
+		return e.emitter.EmitString("~z-INF", asKey)
+	} else {
+		return e.emitter.EmitFloat(f, asKey)
+	}
 }
 
 
@@ -215,9 +263,19 @@ func (ie StringEncoder) IsStringable(v reflect.Value) bool {
 	return true
 }
 
+func (ie StringEncoder) needsEscape(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
+	firstCh := s[0:1]
+
+	return firstCh == START || firstCh == RESERVED || firstCh == SUB
+}
+
 func (ie StringEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	s := v.String()
-	if len(s) > 0 && s[0:1] == "~" {
+	if ie.needsEscape(s){
 		s = "~" + s
 	}
 	return e.emitter.EmitString(s, asKey)
@@ -237,16 +295,7 @@ func (ie UrlEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	log.Println("Encode url::::", v)
 
 	u := v.Interface().(*url.URL)
-
-	var us string
-
-	us = fmt.Sprintf("%s://%s/%s?%s#%s",
-		u.Scheme,
-		u.Host,
-		u.Path,
-		u.Query,
-		u.Fragment)
-
+	us := u.String()
 	log.Println("Encoded:", us)
 	return e.emitter.EmitString(fmt.Sprintf("~r%s", us), asKey)
 }

@@ -54,7 +54,7 @@ func VerifyRoundTrip(t *testing.T, value interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	if !same.IsSame(newValue, value) {
+	if !same.IsSame(value, newValue) {
 		t.Errorf("Round trip values do not match.\nValue:[%v]\n%v\nNew value:[%v]\n %v",
 			value, reflect.TypeOf(value), newValue, reflect.TypeOf(newValue))
 		return newValue, err
@@ -102,7 +102,6 @@ func VerifyJson(t *testing.T, transit string, path string) error {
 		return err
 	}
 
-	//log.Println("***Expected json:", expectedJson)
 	var expected interface{}
 	if err = json.Unmarshal([]byte(expectedJson), &expected); err != nil {
 		t.Errorf("Error decoding expected [%v]: %v", path, err)

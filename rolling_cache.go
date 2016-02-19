@@ -94,7 +94,7 @@ func (rc RollingCache) IsCacheable(s string, asKey bool) bool {
 func (rc RollingCache) IsCacheKey(name string) bool {
 	if len(name) == 0 {
 		return false
-	} else if (name[0:1] == SUB_STR) && (name != MAP_AS_ARRAY) {
+	} else if (name[0:1] == SUB) && (name != MAP_AS_ARRAY) {
 		return true
 	} else {
 		return false
@@ -105,9 +105,9 @@ func (rc RollingCache) encodeKey(index int) string {
 	var hi = index / CACHE_CODE_DIGITS
 	var lo = index % CACHE_CODE_DIGITS
 	if hi == 0 {
-		return SUB_STR + string(lo+BASE_CHAR_INDEX)
+		return SUB + string(lo+BASE_CHAR_INDEX)
 	} else {
-		return SUB_STR + string(hi+BASE_CHAR_INDEX) + string(lo+BASE_CHAR_INDEX)
+		return SUB + string(hi+BASE_CHAR_INDEX) + string(lo+BASE_CHAR_INDEX)
 	}
 }
 

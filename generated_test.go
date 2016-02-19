@@ -34,6 +34,14 @@ func UuidGen(r ohyeah.Int64F,) ohyeah.Generator {
 }
 
 
+var Numbers = []interface{}{
+	int8(8), int16(16), int32(32), int64(64),
+	uint8(8), uint16(16), uint32(32), uint64(64)}
+
+func NumberGen(r ohyeah.Int64F,) ohyeah.Generator {
+	return ohyeah.ElementGen(r, Numbers)
+}
+
 func KeywordGen(stringGenerator ohyeah.Generator) ohyeah.Generator {
 	return func() interface{} {
 		s := stringGenerator().(string)
@@ -56,19 +64,39 @@ func SetGen(r ohyeah.Int64F, elementGenerator ohyeah.Generator, n int) ohyeah.Ge
 	}
 }
 
-func TestGeneratedMaps(t *testing.T) {
-	r := ohyeah.RandomFunc(99)
-
-	names := []interface{}{"foo", "bar", "baz"}
-	symg := ohyeah.RepeatGen(SymbolGen(ohyeah.ElementGen(r, names)), 40)
-	keyg := KeywordGen(ohyeah.ElementGen(r, names))
-
-	vg := ohyeah.CycleGen(ohyeah.IntGen(r), ohyeah.ConstantGen(1234500),
+func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
+	names := []interface{}{"foo", "bar", "baz", "apple", "organge", "red", "x"}
+	strg := ohyeah.ElementGen(r, names)
+	symg := ohyeah.RepeatGen(strg, 40)
+	keyg := KeywordGen(strg)
+	
+	return ohyeah.CycleGen(
+		ohyeah.IntGen(r),
+		ohyeah.ConstantGen(1234500),
+		ohyeah.RuneGen(r),
+		strg,
 		symg,
 		keyg,
+		NumberGen(r),
 		UuidGen(r),
 		ohyeah.PatternedStringGen(r, "val"),
 		ohyeah.ConstantGen(Keyword("hello")))
+}
+
+
+func TestSimpleValues(t *testing.T) {
+	r := ohyeah.RandomFunc(99)
+	f := SimpleGen(r)
+
+	for i := 0; i < 50; i++ {
+		value := f()
+		VerifyRoundTrip(t, value)
+	}
+}
+
+func TestGeneratedMaps(t *testing.T) {
+	r := ohyeah.RandomFunc(99)
+	vg := SimpleGen(r)
 
 	g := ohyeah.MapGen(r, KeywordGen(ohyeah.PatternedStringGen(r, "key")), ohyeah.ArrayGen(r, vg, 10), 2000)
 

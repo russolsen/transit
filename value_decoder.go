@@ -19,6 +19,7 @@
 package transit
 
 import (
+"log"
 	"container/list"
 	"encoding/base64"
 	"github.com/pborman/uuid"
@@ -43,20 +44,9 @@ func DecodeSymbol(d Decoder, x interface{}) (interface{}, error) {
 	return result, nil
 }
 
-// DecodeKeyword decodes ` reserved values. Actually it just nil.
-func DecodeReserved(d Decoder, x interface{}) (interface{}, error) {
-	return nil, nil
-}
-
-// DecodeTag decodes #tag style tags. Note that this function just handles
-// the tag itself.
-func DecodeTag(d Decoder, x interface{}) (interface{}, error) {
-	s := x.(string)
-	return TagId(s), nil
-}
-
-// DecodeTaggedValue handles an entire tagged value by returning it as more or less unknown.
-func DecodeTaggedValue(d Decoder, x interface{}) (interface{}, error) {
+// DecodeIdentity returns the value unchanged.
+func DecodeIdentity(d Decoder, x interface{}) (interface{}, error) {
+	log.Println("Unknown", x)
 	return x, nil
 }
 
@@ -102,11 +92,6 @@ func DecodeQuote(d Decoder, x interface{}) (interface{}, error) {
 	return tagged.Value, nil
 }
 
-// DecodeTilde decodes an escaped string by stripping off the leading ~.
-func DecodeTilde(d Decoder, x interface{}) (interface{}, error) {
-	s := x.(string)
-	return s[1:], nil
-}
 
 // DecodeRFC3339 decodes a time value into a Go time instance.
 // TBD not 100% this covers all possible values.
@@ -180,8 +165,8 @@ func DecodeRatio(d Decoder, x interface{}) (interface{}, error) {
 	return *result, nil
 }
 
-// DecodeRatio decodes a transit char.
-func DecodeChar(d Decoder, x interface{}) (interface{}, error) {
+// DecodeRune decodes a transit char.
+func DecodeRune(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	return rune(s[0]), nil
 }
@@ -214,8 +199,11 @@ func DecodeByte(d Decoder, x interface{}) (interface{}, error) {
 // DecodeURI decodes a transit URI into an instance of net/Url.
 // Despite the name, Go Urls are almost URIs.
 func DecodeURI(d Decoder, x interface{}) (interface{}, error) {
+	log.Println("url", x)
 	s := x.(string)
-	return url.Parse(s)
+	u, err := url.Parse(s)
+	log.Println("err:", err, "url:", u)
+	return u, err
 }
 
 // DecodeUUID decodes a transit UUID into an instance of net/UUID
@@ -238,9 +226,3 @@ func DecodeSpecialNumber(d Decoder, x interface{}) (interface{}, error) {
 		return nil, &TransitError{Message: "Bad special number:"}
 	}
 }
-
-// DecodeUnknown decodes a tag that we don't otherwise recognize.
-func DecodeUnknown(d Decoder, x interface{}) (interface{}, error) {
-	return x, nil
-}
-
