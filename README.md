@@ -1,7 +1,5 @@
 # transit (go)
 
-Note that this readme file along with the rest of transit-go is very much a work-in-progress.
-
 Transit is a data format and a set of libraries for conveying values between applications written in different languages. This library provides support for marshalling Transit data to/from Go.
 
 * [Rationale](http://blog.cognitect.com/blog/2014/7/22/transit)

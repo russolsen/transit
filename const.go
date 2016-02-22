@@ -32,3 +32,4 @@ const START_SYM = "~$"
 const START_KW = "~:"
 
 const MAP_AS_ARRAY = "^ "
+

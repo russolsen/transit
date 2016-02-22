@@ -32,6 +32,8 @@ type Decoder struct {
 	decoders map[string]Handler
 	Cache    *RollingCache
 }
+
+// NewDecoder returns a new Decoder, ready to write to r.
 func NewDecoder(r io.Reader) *Decoder {
 	jsd := json.NewDecoder(r)
 	jsd.UseNumber()
@@ -67,6 +69,7 @@ func NewDecoder(r io.Reader) *Decoder {
 	return &d
 }
 
+// AddHandler adds a new handler to the decoder, allowing you to extend the types it can handle.
 func (d Decoder) AddHandler(tag string, valueDecoder Handler) {
 	d.decoders[tag] = valueDecoder
 }
@@ -297,6 +300,7 @@ func (d Decoder) Parse(x interface{}, asKey bool) (interface{}, error) {
 	}
 }
 
+// Decode decodes the next Transit value from the stream.
 func (d Decoder) Decode() (interface{}, error) {
 	var jsonObject interface{}
 	var err = d.jsd.Decode(&jsonObject)
@@ -308,6 +312,7 @@ func (d Decoder) Decode() (interface{}, error) {
 	}
 }
 
+// DecodeFromString is a handly function that decodes Transit data held in a string.
 func DecodeFromString(s string) (interface{}, error) {
 	reader := strings.NewReader(s)
 	decoder := NewDecoder(reader)

@@ -292,11 +292,8 @@ func (ie UrlEncoder) IsStringable(v reflect.Value) bool {
 }
 
 func (ie UrlEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
-	log.Println("Encode url::::", v)
-
 	u := v.Interface().(*url.URL)
 	us := u.String()
-	log.Println("Encoded:", us)
 	return e.emitter.EmitString(fmt.Sprintf("~r%s", us), asKey)
 }
 
@@ -433,6 +430,29 @@ func (me MapEncoder) encodeNormalMap(e Encoder, v reflect.Value) error {
 	return e.emitter.EmitEndArray()
 }
 
+
+
+type TaggedValueEncoder struct{}
+
+func NewTaggedValueEncoder() *TaggedValueEncoder {
+	return &TaggedValueEncoder{}
+}
+
+func (ie TaggedValueEncoder) IsStringable(v reflect.Value) bool {
+	return false
+}
+
+func (ie TaggedValueEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	t := v.Interface().(TaggedValue)
+
+	e.emitter.EmitStartArray()
+	e.emitter.EmitTag(string(t.Tag))
+	e.emitter.EmitArraySeparator()
+	e.EncodeInterface(t.Value, asKey)
+	return e.emitter.EmitEndArray()
+}
+
+
 type SetEncoder struct{}
 
 func NewSetEncoder() *SetEncoder {
@@ -483,20 +503,27 @@ func (ie ListEncoder) IsStringable(v reflect.Value) bool {
 func (ie ListEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	lst := v.Interface().(*list.List)
 
-	//log.Println("*** Encode go list")
-
-	//l := v.Len()
 	e.emitter.EmitStartArray()
 	e.emitter.EmitTag("list")
-
+	e.emitter.EmitArraySeparator()
+	e.emitter.EmitStartArray()
+	
+	first := true
 	for element := lst.Front(); element != nil; element = element.Next() {
-		e.emitter.EmitArraySeparator()
+		if first {
+			first = false
+		} else {
+			e.emitter.EmitArraySeparator()
+		}
+
 		err := e.EncodeInterface(element.Value, asKey)
 		if err != nil {
+log.Println("ERRRROR", err)
 			return err
 		}
 	}
 
+	e.emitter.EmitEndArray()
 	return e.emitter.EmitEndArray()
 }
 

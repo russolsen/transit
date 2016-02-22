@@ -21,6 +21,7 @@ package transit
 import (
 	"github.com/russolsen/ohyeah"
 	"github.com/pborman/uuid"
+	"container/list"
 	"testing"
 )
 
@@ -64,6 +65,19 @@ func SetGen(r ohyeah.Int64F, elementGenerator ohyeah.Generator, n int) ohyeah.Ge
 	}
 }
 
+
+func ListGen(r ohyeah.Int64F, elementGenerator ohyeah.Generator, n int) ohyeah.Generator {
+	return func() interface{} {
+		n := ohyeah.IntN(r, n)
+		lst := list.New()
+		
+		for i:=0; i< n; i++ {
+			lst.PushBack(elementGenerator())
+		}
+		return lst
+	}
+}
+
 func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
 	names := []interface{}{"foo", "bar", "baz", "apple", "organge", "red", "x"}
 	strg := ohyeah.ElementGen(r, names)
@@ -79,7 +93,7 @@ func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
 		keyg,
 		NumberGen(r),
 		UuidGen(r),
-		ohyeah.PatternedStringGen(r, "val"),
+		ohyeah.PatternedStringGen("val"),
 		ohyeah.ConstantGen(Keyword("hello")))
 }
 
@@ -98,7 +112,7 @@ func TestGeneratedMaps(t *testing.T) {
 	r := ohyeah.RandomFunc(99)
 	vg := SimpleGen(r)
 
-	g := ohyeah.MapGen(r, KeywordGen(ohyeah.PatternedStringGen(r, "key")), ohyeah.ArrayGen(r, vg, 10), 2000)
+	g := ohyeah.MapGen(r, KeywordGen(ohyeah.PatternedStringGen("key")), ohyeah.ArrayGen(r, vg, 10), 2000)
 
 	for i := 0; i < 4; i++ {
 		value := g()
@@ -107,10 +121,23 @@ func TestGeneratedMaps(t *testing.T) {
 
 }
 
+func TestLists(t *testing.T) {
+	r := ohyeah.RandomFunc(99)
+
+	sg := SimpleGen(r)
+
+	g := ListGen(r, sg, 10)
+
+	for i := 0; i < 40; i++ {
+		value := g()
+		VerifyRoundTrip(t, value)
+	}
+}
+
 func TestSets(t *testing.T) {
 	r := ohyeah.RandomFunc(99)
 
-	symg := SymbolGen(ohyeah.PatternedStringGen(r, "key"))
+	symg := SymbolGen(ohyeah.PatternedStringGen("key"))
 
 	sg := ohyeah.RepeatGen(SetGen(r, symg, 2000), 1)
 	g := ohyeah.ArrayGen(r, sg, 100)

@@ -19,7 +19,6 @@
 package transit
 
 import (
-"log"
 	"container/list"
 	"encoding/base64"
 	"github.com/pborman/uuid"
@@ -46,7 +45,6 @@ func DecodeSymbol(d Decoder, x interface{}) (interface{}, error) {
 
 // DecodeIdentity returns the value unchanged.
 func DecodeIdentity(d Decoder, x interface{}) (interface{}, error) {
-	log.Println("Unknown", x)
 	return x, nil
 }
 
@@ -199,10 +197,8 @@ func DecodeByte(d Decoder, x interface{}) (interface{}, error) {
 // DecodeURI decodes a transit URI into an instance of net/Url.
 // Despite the name, Go Urls are almost URIs.
 func DecodeURI(d Decoder, x interface{}) (interface{}, error) {
-	log.Println("url", x)
 	s := x.(string)
 	u, err := url.Parse(s)
-	log.Println("err:", err, "url:", u)
 	return u, err
 }
 

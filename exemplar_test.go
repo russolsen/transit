@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"testing"
+	"container/list"
 )
 
 var exemplars map[string]interface{}
@@ -30,6 +31,23 @@ func init() {
 	exemplars = make(map[string]interface{})
 
 	// /*
+	exemplars["nil.json"] = nil
+
+	exemplars["true.json"] = false
+	exemplars["true.json"] = true
+
+	exemplars["one.json"] = 1
+	exemplars["zero.json"] = 0
+	
+	exemplars["one_string.json"] = "hello"
+	exemplars["one_symbol.json"] = Symbol("hello")
+	exemplars["one_keyword.json"] = Keyword("hello")
+
+
+	exemplars["vector_empty.json"] = []interface{}{}
+	exemplars["list_empty.json"] = list.New()
+	exemplars["set_empty.json"] = MakeSet()
+
 	exemplars["small_strings.json"] = []string{
 		"", "a", "ab", "abc", "abcd", "abcde", "abcdef"}
 

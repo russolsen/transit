@@ -50,13 +50,13 @@ func VerifyRoundTrip(t *testing.T, value interface{}) (interface{}, error) {
 	newValue, err := DecodeFromString(json)
 
 	if err != nil {
-		t.Errorf("Error decoding %v: %v", value, err)
+		t.Errorf("Error decoding %v: %v.\nJson:\n%v", value, err, json)
 		return nil, err
 	}
 
 	if !same.IsSame(value, newValue) {
-		t.Errorf("Round trip values do not match.\nValue:[%v]\n%v\nNew value:[%v]\n %v",
-			value, reflect.TypeOf(value), newValue, reflect.TypeOf(newValue))
+		t.Errorf("Round trip values do not match.\nValue:[%v]\n%v\nNew value:[%v]\n %v\nJson:\n%v",
+			value, reflect.TypeOf(value), newValue, reflect.TypeOf(newValue), json)
 		return newValue, err
 	}
 

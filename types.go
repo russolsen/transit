@@ -49,7 +49,6 @@ type TaggedValue struct {
 	Value interface{}
 }
 
-
 // A Keyword is a transit keyword, really just a string by another type.
 type Keyword string
 

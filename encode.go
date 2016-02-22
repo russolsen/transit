@@ -47,12 +47,13 @@ var timeType = reflect.TypeOf(time.Now())
 var bigIntType = reflect.TypeOf(*big.NewInt(int64(1)))
 var bigFloatType = reflect.TypeOf(*big.NewFloat(float64(1.)))
 var uuidType = reflect.TypeOf(uuid.NewRandom())
+var taggedValueType = reflect.TypeOf(TaggedValue{TagId("#foo"), 1})
 
 var runeType = reflect.TypeOf('x')
 var nilValue = reflect.ValueOf(nil)
 var nilEncoder = NewNilEncoder()
 
-// Create a new encoder set to writ to the stream supplied.
+// NewEncoder creates a new encoder set to writ to the stream supplied.
 func NewEncoder(w io.Writer) *Encoder {
 	valueEncoders := make(map[interface{}]ValueEncoder)
 
@@ -89,11 +90,8 @@ func NewEncoder(w io.Writer) *Encoder {
 
 	e.addHandler(reflect.Array, arrayEncoder)
 	e.addHandler(reflect.Slice, arrayEncoder)
-
 	e.addHandler(reflect.Map, NewMapEncoder())
 
-
-	// Char
 	// Link
 
 	e.addHandler(runeType, NewRuneEncoder())
@@ -107,6 +105,8 @@ func NewEncoder(w io.Writer) *Encoder {
 	e.addHandler(cmapType, NewCMapEncoder())
 	e.addHandler(setType, NewSetEncoder())
 	e.addHandler(urlType, NewUrlEncoder())
+
+	e.addHandler(taggedValueType, NewTaggedValueEncoder())
 
 	return &e
 }
@@ -167,9 +167,15 @@ func (e Encoder) EncodeInterface(x interface{}, asKey bool) error {
 	return e.EncodeValue(v, asKey)
 }
 
-// Encode a value assuming that it is not a map keys. Good for the
-// top level of encoding.
+// Encode a value at the top level.
 func (e Encoder) Encode(x interface{}) error {
+	v := reflect.ValueOf(x)
+	valueEncoder := e.ValueEncoderFor(v)
+
+	if valueEncoder.IsStringable(v) {
+		x = TaggedValue{TagId("'"), x}
+	} 
+
 	return e.EncodeInterface(x, false)
 }
 
