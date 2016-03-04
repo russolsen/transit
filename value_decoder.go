@@ -117,7 +117,7 @@ func DecodeBoolean(d Decoder, x interface{}) (interface{}, error) {
 	} else if s == "f" {
 		return false, nil
 	} else {
-		return nil, &TransitError{Message: "Unknow boolean value"}
+		return nil, &TransitError{Message: "Unknown boolean value."}
 	}
 }
 
@@ -125,11 +125,14 @@ func DecodeBoolean(d Decoder, x interface{}) (interface{}, error) {
 func DecodeBigInteger(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	result := new(big.Int)
-	result.SetString(s, 10)
+	_, good := result.SetString(s, 10)
+	if ! good {
+		return nil, &TransitError{Message: "Unable to part big integer: " + s}
+	}
 	return result, nil
 }
 
-// DecodeBigInteger decodes a transit integer into a plain Go int64
+// DecodeInteger decodes a transit integer into a plain Go int64
 func DecodeInteger(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	result, err := strconv.ParseInt(s, 10, 64)

@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -19,29 +19,14 @@
 package transit
 
 import (
+	"container/list"
 	"encoding/base64"
 	"github.com/pborman/uuid"
-	"container/list"
 	"math"
 	"math/big"
 	"net/url"
-	"reflect"
 	"testing"
 )
-
-func assertEquals(t *testing.T, v1, v2 interface{}) {
-	if v1 != v2 {
-		t.Errorf("Expected %v[%v] == %v[%v]", v1, reflect.TypeOf(v1), v2, reflect.TypeOf(v2))
-	}
-}
-
-func assertTrue(t *testing.T, v interface{}) {
-	assertEquals(t, v, true)
-}
-
-func assertFalse(t *testing.T, v interface{}) {
-	assertEquals(t, v, false)
-}
 
 func DecodeTransit(t *testing.T, s string) interface{} {
 	value, err := DecodeFromString(s)
@@ -61,8 +46,10 @@ func TestReadString(t *testing.T) {
 
 func TestReadBoolean(t *testing.T) {
 
-	assertTrue(t, DecodeTransit(t, "\"~?t\""))
-	assertFalse(t, DecodeTransit(t, "\"~?f\""))
+	assertTrue(t, DecodeTransit(t, `"~?t"`))
+	assertFalse(t, DecodeTransit(t, `"~?f"`))
+	VerifyReadError(t, `"~?X"`)
+	VerifyReadError(t, `"~?"`)
 }
 
 func TestReadNull(t *testing.T) {
@@ -78,11 +65,13 @@ func TestReadKeyword(t *testing.T) {
 
 func TestReadInteger(t *testing.T) {
 
-	i := DecodeTransit(t, "\"~i42\"")
+	i := DecodeTransit(t, `"~i42"`)
 	assertEquals(t, int64(42), i)
 
-	j := DecodeTransit(t, "\"~n1234\"").(*big.Int)
+	j := DecodeTransit(t, `"~n1234"`).(*big.Int)
 	assertEquals(t, j.Int64(), int64(1234))
+
+	VerifyReadError(t, `"~nxyz"`)
 }
 
 func TestReadDouble(t *testing.T) {
@@ -90,21 +79,29 @@ func TestReadDouble(t *testing.T) {
 }
 
 func TestReadSpecialNumbers(t *testing.T) {
-	assertTrue(t, math.IsNaN(DecodeTransit(t, "\"~zNaN\"").(float64)))
-	assertTrue(t, math.IsInf(DecodeTransit(t, "\"~zINF\"").(float64), 1))
-	assertTrue(t, math.IsInf(DecodeTransit(t, "\"~z-INF\"").(float64), -1))
+	assertTrue(t, math.IsNaN(DecodeTransit(t, `"~zNaN"`).(float64)))
+	assertTrue(t, math.IsInf(DecodeTransit(t, `"~zINF"`).(float64), 1))
+	assertTrue(t, math.IsInf(DecodeTransit(t, `"~z-INF"`).(float64), -1))
+
+	//VerifyReadError(t, `"~zXYZ"`)
 }
 
 func TestReadBigDecimal(t *testing.T) {
-	bd := DecodeTransit(t, "\"~f42.5\"").(*big.Float)
+	bd := DecodeTransit(t, `"~f42.5"`).(*big.Float)
 	x, _ := bd.Float64()
 	assertTrue(t, x-42.5 < 0.001)
+
+	//VerifyReadError(t, `"~fXYZ"`)
 }
 
 func TestReadUUID(t *testing.T) {
 	u := uuid.Parse("07886363-98EC-4266-BE51-E09539AEE2A0")
-	from_transit := DecodeTransit(t, "\"~u"+u.String()+"\"").(uuid.UUID)
+	s := `"~u` + u.String()+ `"`
+
+	from_transit := DecodeTransit(t, s).(uuid.UUID)
 	assertEquals(t, u.String(), from_transit.String())
+
+	//VerifyReadError(t, `"~uXYZ"`)
 }
 
 func TestReadURI(t *testing.T) {
@@ -158,55 +155,49 @@ func TestReadBinary(t *testing.T) {
 	}
 }
 
-    func TestReadMap(t *testing.T) {
+func TestReadMap(t *testing.T) {
+	m := DecodeTransit(t, `{"a": 2, "b": 4}`).(map[interface{}]interface{})
 
-        m := DecodeTransit(t, "{\"a\": 2, \"b\": 4}").(map[interface{}]interface{})
+	assertEquals(t, 2, len(m))
+	assertEquals(t, int64(2), m["a"].(int64))
+	assertEquals(t, int64(4), m["b"].(int64))
+}
 
-        assertEquals(t, 2, len(m))
-        assertEquals(t, int64(2), m["a"].(int64))
-        assertEquals(t, int64(4), m["b"].(int64))
-    }
+func TestReadSet(t *testing.T) {
 
-    func TestReadSet(t *testing.T) {
+	s := DecodeTransit(t, `{"~#set": [1, 2, 3]}`).(*Set)
 
-        s := DecodeTransit(t, `{"~#set": [1, 2, 3]}`).(*Set)
+	assertEquals(t, 3, len(s.Contents))
 
-        assertEquals(t, 3, len(s.Contents))
+	assertTrue(t, s.ContainsEq(int64(1)))
+	assertTrue(t, s.ContainsEq(int64(2)))
+	assertTrue(t, s.ContainsEq(int64(3)))
+}
 
-        assertTrue(t, s.ContainsEq(int64(1)))
-        assertTrue(t, s.ContainsEq(int64(2)))
-        assertTrue(t, s.ContainsEq(int64(3)))
-    }
+func TestReadList(t *testing.T) {
 
-    func TestReadList(t *testing.T) {
+	l := DecodeTransit(t, `{"~#list": [1, 2, 3]}`).(*list.List)
 
-        l := DecodeTransit(t, `{"~#list": [1, 2, 3]}`).(*list.List)
+	assertEquals(t, 3, l.Len())
 
-        assertEquals(t, 3, l.Len())
+	assertEquals(t, int64(1), l.Front().Value)
+	assertEquals(t, int64(2), l.Front().Next().Value)
+	assertEquals(t, int64(3), l.Front().Next().Next().Value)
+}
 
-        assertEquals(t, int64(1), l.Front().Value)
-        assertEquals(t, int64(2), l.Front().Next().Value)
-        assertEquals(t, int64(3), l.Front().Next().Next().Value)
-    }
-
-    func TestReadRatio(t *testing.T) {
-        r := DecodeTransit(t, "{\"~#ratio\": [\"~n1\",\"~n2\"]}").(big.Rat)
+func TestReadRatio(t *testing.T) {
+	r := DecodeTransit(t, `{"~#ratio": ["~n1","~n2"]}`).(big.Rat)
 	f64, _ := r.Float64()
-        assertTrue(t, math.Abs(f64 - 0.5) < 0.001)
-    }
+	assertTrue(t, math.Abs(f64-0.5) < 0.001)
+}
 
-    func TestReadCmap(t *testing.T) {
-        //m := DecodeTransit(t, "{\"~#cmap\": [{\"~#ratio\":[\"~n1\",\"~n3\"]},1,{\"~#list\":[1,2,3]},2]}").(*CMap)
-
-        m := DecodeTransit(t, `{"~#cmap": [{"~#ratio":["~n1","~n3"]},1,{"~#list":[1,2,3]},2]}`).(*CMap)
-
-        //m := DecodeTransit(t, "{\"~#cmap\": [\"hello\", 1, \"BYE\", 2]}").(*CMap)
+func TestReadCmap(t *testing.T) {
+	m := DecodeTransit(t, `{"~#cmap": [{"~#ratio":["~n1","~n3"]},1,{"~#list":[1,2,3]},2]}`).(*CMap)
 
 	key := m.Entries[0].Key.(big.Rat)
 	value := m.Entries[0].Value.(int64)
-	
-	f64, _ := key.Float64()
-        assertTrue(t, math.Abs(f64 - 0.333333333) < 0.001)
-	assertEquals(t, value, int64(1))
-    }
 
+	f64, _ := key.Float64()
+	assertTrue(t, math.Abs(f64-0.333333333) < 0.001)
+	assertEquals(t, value, int64(1))
+}

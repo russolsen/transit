@@ -28,6 +28,21 @@ import (
 	"testing"
 )
 
+func assertEquals(t *testing.T, v1, v2 interface{}) {
+	if v1 != v2 {
+		t.Errorf("Expected %v[%v] == %v[%v]", v1, reflect.TypeOf(v1), v2, reflect.TypeOf(v2))
+	}
+}
+
+func assertTrue(t *testing.T, v interface{}) {
+	assertEquals(t, v, true)
+}
+
+func assertFalse(t *testing.T, v interface{}) {
+	assertEquals(t, v, false)
+}
+
+
 func ExemplarPath(fileName string) string {
 	return "transit-format/examples/0.8/simple/" + fileName
 }
@@ -118,4 +133,11 @@ func VerifyJson(t *testing.T, transit string, path string) error {
 func Verify(t *testing.T, value interface{}, exemplarPath string) {
 	transit, _ := VerifyRoundTrip(t, value)
 	VerifyExemplar(t, transit, exemplarPath)
+}
+
+func VerifyReadError(t *testing.T, badTransitJson string) {
+	_, err := DecodeFromString(badTransitJson)
+	if err == nil {
+		t.Errorf("Expected that decoding [%v] would generate an error, but it did not.", badTransitJson)
+	}
 }
