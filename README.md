@@ -92,7 +92,7 @@ func WriteTransit(path string, value interface{}) {
 | char | rune | rune |
 | special numbers | As defined by math NaN and math.Inf() | TBD
 | array | arrays or slices | []interface{} |
-| map | - | map[interface{}]interface{} | 
+| map | map[interface{}]interface{} | map[interface{}]interface{} | 
 | set |  transit.Set | transit.Set |
 | list | container/list List | container/list List |
 | map w/ composite keys |  transit.CMap |  transit.CMap |
