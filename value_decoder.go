@@ -178,12 +178,13 @@ func DecodeDecimal(d Decoder, x interface{}) (interface{}, error) {
 	return strconv.ParseFloat(s, 64)
 }
 
-// DecodeRatio decodes a transit big decimal into an float64.
+// DecodeBigDecimal decodes a transit big decimal into an float64.
 func DecodeBigDecimal(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	result, _, _ := big.ParseFloat(s, 10, 25, big.ToZero)
 	return result, nil
 }
+
 
 // DecodeRatio decodes a transit null/nil.
 func DecodeNil(d Decoder, x interface{}) (interface{}, error) {
@@ -195,6 +196,19 @@ func DecodeNil(d Decoder, x interface{}) (interface{}, error) {
 func DecodeByte(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	return base64.StdEncoding.DecodeString(s)
+}
+
+// DecodeLink decodes a transit link into an instance of Link.
+func DecodeLink(d Decoder, x interface{}) (interface{}, error) {
+	tv := x.(TaggedValue)
+	v := tv.Value.(map[interface{}]interface{})
+	l := NewLink()
+	l.Href = v["href"].(*url.URL)
+	l.Name = v["name"].(string)
+	l.Rel = v["rel"].(string)
+	l.Prompt = v["prompt"].(string)
+	l.Render = v["render"].(string)
+	return l, nil
 }
 
 // DecodeURI decodes a transit URI into an instance of net/Url.

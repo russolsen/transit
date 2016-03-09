@@ -60,7 +60,7 @@ func NewDecoder(r io.Reader) *Decoder {
 	d.AddHandler("z", DecodeSpecialNumber)
 
 	d.AddHandler("set", DecodeSet)
-	// link
+	d.AddHandler("link", DecodeLink)
 	d.AddHandler("list", DecodeList)
 	d.AddHandler("cmap", DecodeCMap)
 	d.AddHandler("ratio", DecodeRatio)

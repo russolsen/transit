@@ -38,10 +38,10 @@ func DecodeTransit(t *testing.T, s string) interface{} {
 }
 
 func TestReadString(t *testing.T) {
-	assertEquals(t, "foo", DecodeTransit(t, "\"foo\""))
-	assertEquals(t, "~foo", DecodeTransit(t, "\"~~foo\""))
+	assertEquals(t, "foo", DecodeTransit(t, `"foo"`))
+	assertEquals(t, "~foo", DecodeTransit(t, `"~~foo"`))
 	assertEquals(t, "`foo", DecodeTransit(t, "\"~`foo\""))
-	assertEquals(t, "^foo", DecodeTransit(t, "\"~^foo\""))
+	assertEquals(t, "^foo", DecodeTransit(t, `"~^foo"`))
 }
 
 func TestReadBoolean(t *testing.T) {
@@ -54,7 +54,7 @@ func TestReadBoolean(t *testing.T) {
 
 func TestReadNull(t *testing.T) {
 
-	assertEquals(t, nil, DecodeTransit(t, "\"~_\""))
+	assertEquals(t, nil, DecodeTransit(t, `"~_"`))
 }
 
 func TestReadKeyword(t *testing.T) {
@@ -200,4 +200,13 @@ func TestReadCmap(t *testing.T) {
 	f64, _ := key.Float64()
 	assertTrue(t, math.Abs(f64-0.333333333) < 0.001)
 	assertEquals(t, value, int64(1))
+}
+
+func TestLink(t *testing.T) {
+	l := DecodeTransit(t, `["~#link" , ["^ ", "href", "~rhttp://foo.com", "rel", "r", "name", "n", "render", "link", "prompt", "p"]]`).(*Link)
+	assertEquals(t, l.Href.String(), "http://foo.com")
+	assertEquals(t, l.Rel, "r")
+	assertEquals(t, l.Name, "n")
+	assertEquals(t, l.Render, "link")
+	assertEquals(t, l.Prompt, "p")
 }

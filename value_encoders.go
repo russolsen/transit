@@ -562,3 +562,32 @@ func (ie CMapEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 
 	return e.emitter.EmitEndArray()
 }
+
+type LinkEncoder struct{}
+
+func NewLinkEncoder() *LinkEncoder {
+	return &LinkEncoder{}
+}
+
+func (ie LinkEncoder) IsStringable(v reflect.Value) bool {
+	return false
+}
+
+func (ie LinkEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	link := v.Interface().(*Link)
+
+	e.emitter.EmitStartArray()
+	e.emitter.EmitTag("link")
+	e.emitter.EmitArraySeparator()
+
+	m := map[string]interface{}{
+		"href": link.Href,
+		"rel": link.Rel,
+		"name": link.Name,
+		"prompt": link.Prompt,
+		"render": link.Render,
+	}
+
+	e.Encode(m)
+	return e.emitter.EmitEndArray()
+}

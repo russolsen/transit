@@ -47,6 +47,7 @@ var timeType = reflect.TypeOf(time.Now())
 var bigIntType = reflect.TypeOf(*big.NewInt(int64(1)))
 var bigFloatType = reflect.TypeOf(*big.NewFloat(float64(1.)))
 var uuidType = reflect.TypeOf(uuid.NewRandom())
+var linkType = reflect.TypeOf(*NewLink())
 var taggedValueType = reflect.TypeOf(TaggedValue{TagId("#foo"), 1})
 
 var runeType = reflect.TypeOf('x')
@@ -105,6 +106,7 @@ func NewEncoder(w io.Writer) *Encoder {
 	e.addHandler(cmapType, NewCMapEncoder())
 	e.addHandler(setType, NewSetEncoder())
 	e.addHandler(urlType, NewUrlEncoder())
+	e.addHandler(linkType, NewLinkEncoder())
 
 	e.addHandler(taggedValueType, NewTaggedValueEncoder())
 

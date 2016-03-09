@@ -32,7 +32,6 @@ func Equals(a, b interface{}) bool {
 }
 
 
-
 // A tag id represents a #tag in the transit protocol.
 type TagId string
 
