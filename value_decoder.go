@@ -50,7 +50,18 @@ func DecodeIdentity(d Decoder, x interface{}) (interface{}, error) {
 
 // DecodeCMap decodes maps with composite keys.
 func DecodeCMap(d Decoder, x interface{}) (interface{}, error) {
-	array := x.(TaggedValue).Value.([]interface{})
+
+	tagged := x.(TaggedValue)
+
+	if ! IsGenericArray(tagged.Value) {
+		return nil, NewTransitError("Cmap contents are not an array.", tagged)
+	}
+
+	array := tagged.Value.([]interface{})
+
+	if (len(array) % 2) != 0 {
+		return nil, NewTransitError("Cmap contents must contain an even number of elements.", tagged)
+	}
 
 	var result = NewCMap()
 
@@ -68,6 +79,9 @@ func DecodeCMap(d Decoder, x interface{}) (interface{}, error) {
 // DecodeSet decodes a transit set into a transit.Set instance.
 func DecodeSet(d Decoder, x interface{}) (interface{}, error) {
 	tagged := x.(TaggedValue)
+	if ! IsGenericArray(tagged.Value) {
+		return nil, NewTransitError("Set contents are not an array.", tagged)
+	}
 	values := (tagged.Value).([]interface{})
 	result := NewSet(values)
 	return result, nil
@@ -76,6 +90,9 @@ func DecodeSet(d Decoder, x interface{}) (interface{}, error) {
 // DecodeList decodes a transit list into a Go list.
 func DecodeList(d Decoder, x interface{}) (interface{}, error) {
 	tagged := x.(TaggedValue)
+	if ! IsGenericArray(tagged.Value) {
+		return nil, NewTransitError("List contents are not an array.", tagged)
+	}
 	values := (tagged.Value).([]interface{})
 	result := list.New()
 	for _, item := range values {
@@ -145,23 +162,42 @@ func newRational(a, b *big.Int) *big.Rat {
 	return r
 }
 
-func toBigInt(x interface{}) *big.Int {
+func toBigInt(x interface{}) (*big.Int, error) {
 	switch v := x.(type) {
 	default:
-		return big.NewInt(0)
+		return nil, NewTransitError("Not a numeric value", v)
 	case *big.Int:
-		return v
+		return v, nil
 	case int64:
-		return big.NewInt(v)
+		return big.NewInt(v), nil
 	}
 }
 
 // DecodeRatio decodes a transit ratio into a Go big.Rat.
 func DecodeRatio(d Decoder, x interface{}) (interface{}, error) {
 	tagged := x.(TaggedValue)
+	if ! IsGenericArray(tagged.Value) {
+		return nil, NewTransitError("Ratio contents are not an array.", tagged)
+	}
+
 	values := (tagged.Value).([]interface{})
-	a := toBigInt(values[0])
-	b := toBigInt(values[1])
+
+	if len(values) != 2 {
+		return nil, NewTransitError("Ratio contents does not contain 2 elements.", tagged)
+	}
+
+	a, err := toBigInt(values[0])
+
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := toBigInt(values[1])
+
+	if err != nil {
+		return nil, err
+	}
+
 	result := newRational(a, b)
 	return *result, nil
 }
@@ -181,8 +217,8 @@ func DecodeDecimal(d Decoder, x interface{}) (interface{}, error) {
 // DecodeBigDecimal decodes a transit big decimal into an float64.
 func DecodeBigDecimal(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
-	result, _, _ := big.ParseFloat(s, 10, 25, big.ToZero)
-	return result, nil
+	result, _, err := big.ParseFloat(s, 10, 25, big.ToZero)
+	return result, err 
 }
 
 
@@ -223,6 +259,9 @@ func DecodeURI(d Decoder, x interface{}) (interface{}, error) {
 func DecodeUUID(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	var u = uuid.Parse(s)
+	if u == nil {
+		return nil, &TransitError{Message: "Unable to parse uuid [" + s + "]"}	
+	}
 	return u, nil
 }
 

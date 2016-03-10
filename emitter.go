@@ -46,11 +46,11 @@ type DataEmitter interface {
 
 type JsonEmitter struct {
 	writer io.Writer
-	cache  *RollingCache
+	cache  Cache
 }
 
-func NewJsonEmitter(w io.Writer) *JsonEmitter {
-	return &JsonEmitter{writer: w, cache: NewRollingCache()}
+func NewJsonEmitter(w io.Writer, cache Cache) *JsonEmitter {
+	return &JsonEmitter{writer: w, cache: cache}
 }
 
 // Emit the string unaltered and without quotes. This is the lowest level emitter.

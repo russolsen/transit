@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -19,12 +19,12 @@
 package transit
 
 import (
-	"os"
-	"reflect"
 	"encoding/json"
 	"github.com/russolsen/same"
 	"io/ioutil"
 	"net/url"
+	"os"
+	"reflect"
 	"testing"
 )
 
@@ -42,40 +42,39 @@ func assertFalse(t *testing.T, v interface{}) {
 	assertEquals(t, v, false)
 }
 
-
 func ExemplarPath(fileName string) string {
 	return "transit-format/examples/0.8/simple/" + fileName
 }
-
 
 func toUrl(s string) *url.URL {
 	url, _ := url.Parse(s)
 	return url
 }
 
+func VerifyRoundTrip(t *testing.T, value interface{}) interface{} {
 
-func VerifyRoundTrip(t *testing.T, value interface{}) (interface{}, error) {
-	json, err := EncodeToString(value)
+	var newValue interface{}
 
-	if err != nil {
-		t.Errorf("Error encoding to Transit %v: %v", value, err)
-		return nil, err
+	for _, verbose := range []bool{true, false} {
+		json, err := EncodeToString(value, verbose)
+
+		if err != nil {
+			t.Errorf("Error encoding to Transit %v: %v", value, err)
+		}
+
+		newValue, err = DecodeFromString(json)
+
+		if err != nil {
+			t.Errorf("Error decoding %v: %v.\nJson:\n%v", value, err, json)
+		}
+
+		if !same.IsSame(value, newValue) {
+			t.Errorf("Round trip values do not match.\nValue:[%v]\n%v\nNew value:[%v]\n %v\nJson:\n%v",
+				value, reflect.TypeOf(value), newValue, reflect.TypeOf(newValue), json)
+		}
 	}
 
-	newValue, err := DecodeFromString(json)
-
-	if err != nil {
-		t.Errorf("Error decoding %v: %v.\nJson:\n%v", value, err, json)
-		return nil, err
-	}
-
-	if !same.IsSame(value, newValue) {
-		t.Errorf("Round trip values do not match.\nValue:[%v]\n%v\nNew value:[%v]\n %v\nJson:\n%v",
-			value, reflect.TypeOf(value), newValue, reflect.TypeOf(newValue), json)
-		return newValue, err
-	}
-
-	return newValue, err
+	return newValue
 }
 
 func VerifyExemplar(t *testing.T, transitValue interface{}, exemplarPath string) {
@@ -131,7 +130,7 @@ func VerifyJson(t *testing.T, transit string, path string) error {
 }
 
 func Verify(t *testing.T, value interface{}, exemplarPath string) {
-	transit, _ := VerifyRoundTrip(t, value)
+	transit := VerifyRoundTrip(t, value)
 	VerifyExemplar(t, transit, exemplarPath)
 }
 

@@ -26,8 +26,10 @@ import (
 )
 
 var Uuids = []interface{}{
-	uuid.Parse("EC5A75-A0F3-4166-AE54-6498C5063042"),
 	uuid.Parse("6E4BA181-E528-4676-84A2-87974DEBBE90"),
+	uuid.Parse("6E4BA181-E528-4676-84A2-87974DEBBE91"),
+	uuid.Parse("6E4BA181-E528-4676-84A2-87974DEBBE92"),
+	uuid.Parse("D5E0D599-83F1-47E9-9A27-73E4131590D8"),
 	uuid.Parse("D5E0D599-83F1-47E9-9A27-73E4131590E8")}
 
 func UuidGen(r ohyeah.Int64F,) ohyeah.Generator {
@@ -96,7 +98,6 @@ func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
 		ohyeah.PatternedStringGen("val"),
 		ohyeah.ConstantGen(Keyword("hello")))
 }
-
 
 func TestSimpleValues(t *testing.T) {
 	r := ohyeah.RandomFunc(99)

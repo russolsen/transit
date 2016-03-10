@@ -59,7 +59,7 @@ func WriteTransit(path string, value interface{}) {
 		return
 	}
 
-	encoder := transit.NewEncoder(f)
+	encoder := transit.NewEncoder(f, false)
 
 	err = encoder.Encode(value)
 

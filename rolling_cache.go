@@ -19,9 +19,8 @@
 
 package transit
 
-import (
-	"fmt"
-)
+import ("fmt")
+
 
 const CACHE_CODE_DIGITS = 44
 const BASE_CHAR_INDEX = 48
@@ -61,7 +60,6 @@ func (rc RollingCache) Write(name string) string {
 
 	if present {
 		return existing_key
-		//log.Println("It's in there!")
 	}
 
 	if rc.isCacheFull() {

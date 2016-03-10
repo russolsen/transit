@@ -83,7 +83,7 @@ func TestReadSpecialNumbers(t *testing.T) {
 	assertTrue(t, math.IsInf(DecodeTransit(t, `"~zINF"`).(float64), 1))
 	assertTrue(t, math.IsInf(DecodeTransit(t, `"~z-INF"`).(float64), -1))
 
-	//VerifyReadError(t, `"~zXYZ"`)
+	VerifyReadError(t, `"~zXYZ"`)
 }
 
 func TestReadBigDecimal(t *testing.T) {
@@ -91,7 +91,7 @@ func TestReadBigDecimal(t *testing.T) {
 	x, _ := bd.Float64()
 	assertTrue(t, x-42.5 < 0.001)
 
-	//VerifyReadError(t, `"~fXYZ"`)
+	VerifyReadError(t, `"~fXYZ"`)
 }
 
 func TestReadUUID(t *testing.T) {
@@ -101,7 +101,7 @@ func TestReadUUID(t *testing.T) {
 	from_transit := DecodeTransit(t, s).(uuid.UUID)
 	assertEquals(t, u.String(), from_transit.String())
 
-	//VerifyReadError(t, `"~uXYZ"`)
+	VerifyReadError(t, `"~uXYZ"`)
 }
 
 func TestReadURI(t *testing.T) {
@@ -172,6 +172,8 @@ func TestReadSet(t *testing.T) {
 	assertTrue(t, s.ContainsEq(int64(1)))
 	assertTrue(t, s.ContainsEq(int64(2)))
 	assertTrue(t, s.ContainsEq(int64(3)))
+
+	VerifyReadError(t, `{"~#set": 55}`)
 }
 
 func TestReadList(t *testing.T) {
@@ -183,12 +185,19 @@ func TestReadList(t *testing.T) {
 	assertEquals(t, int64(1), l.Front().Value)
 	assertEquals(t, int64(2), l.Front().Next().Value)
 	assertEquals(t, int64(3), l.Front().Next().Next().Value)
+
+	VerifyReadError(t, `{"~#list": 55}`)
+	VerifyReadError(t, `{"~#list": {"foo": 55}}`)
 }
 
 func TestReadRatio(t *testing.T) {
 	r := DecodeTransit(t, `{"~#ratio": ["~n1","~n2"]}`).(big.Rat)
 	f64, _ := r.Float64()
 	assertTrue(t, math.Abs(f64-0.5) < 0.001)
+
+	VerifyReadError(t, `{"~#ratio": {"foo": 55}}`)
+	VerifyReadError(t, `{"~#ratio": ["foo", "bar"]}`)
+	VerifyReadError(t, `{"~#ratio": [77]}`)
 }
 
 func TestReadCmap(t *testing.T) {
@@ -200,6 +209,10 @@ func TestReadCmap(t *testing.T) {
 	f64, _ := key.Float64()
 	assertTrue(t, math.Abs(f64-0.333333333) < 0.001)
 	assertEquals(t, value, int64(1))
+
+	VerifyReadError(t, `{"~#cmap": 44}`)
+	VerifyReadError(t, `{"~#cmap": [1]}`)
+	VerifyReadError(t, `{"~#cmap": [1,2,3]}`)
 }
 
 func TestLink(t *testing.T) {

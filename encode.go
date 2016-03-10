@@ -55,10 +55,20 @@ var nilValue = reflect.ValueOf(nil)
 var nilEncoder = NewNilEncoder()
 
 // NewEncoder creates a new encoder set to writ to the stream supplied.
-func NewEncoder(w io.Writer) *Encoder {
+// The verbose parameter controls transit's verbose vs non-verbose mode.
+// Generally for production you want verbose = false.
+func NewEncoder(w io.Writer, verbose bool) *Encoder {
 	valueEncoders := make(map[interface{}]ValueEncoder)
 
-	emitter := NewJsonEmitter(w)
+	var cache Cache
+
+	if verbose {
+		cache = NewNoopCache()
+	} else {
+		cache = NewRollingCache()
+	}
+
+	emitter := NewJsonEmitter(w, cache)
 	e := Encoder{emitter: emitter, valueEncoders: valueEncoders}
 
 	e.addHandler(reflect.String, NewStringEncoder())
@@ -91,7 +101,7 @@ func NewEncoder(w io.Writer) *Encoder {
 
 	e.addHandler(reflect.Array, arrayEncoder)
 	e.addHandler(reflect.Slice, arrayEncoder)
-	e.addHandler(reflect.Map, NewMapEncoder())
+	e.addHandler(reflect.Map, NewMapEncoder(verbose))
 
 	// Link
 
@@ -182,9 +192,9 @@ func (e Encoder) Encode(x interface{}) error {
 }
 
 // Encode the given value to a string.
-func EncodeToString(x interface{}) (string, error) {
+func EncodeToString(x interface{}, verbose bool) (string, error) {
 	var buf bytes.Buffer
-	var encoder = NewEncoder(&buf)
+	var encoder = NewEncoder(&buf, verbose)
 	err := encoder.Encode(x)
 
 	if err != nil {

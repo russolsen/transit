@@ -42,6 +42,7 @@ func GetElement(array reflect.Value, i int) reflect.Value {
 	return reflect.ValueOf(element.Interface())
 }
 
+// KeyValues returns the Values for the keys in a map.
 func KeyValues(m reflect.Value) []reflect.Value {
 	keys := m.MapKeys()
 	result := make([]reflect.Value, len(keys))
@@ -50,4 +51,13 @@ func KeyValues(m reflect.Value) []reflect.Value {
 		result[i] = reflect.ValueOf(v.Interface())
 	}
 	return result
+}
+
+func IsGenericArray(x interface{}) bool {
+	switch x.(type) {
+	case []interface{}:
+		return true
+	default:
+		return false
+	}
 }

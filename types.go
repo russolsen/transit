@@ -20,6 +20,13 @@ package transit
 
 import("fmt")
 
+// Cache is the interface for (obviously) caches. Implemented
+// by RollingCache and NoopCache.
+type Cache interface {
+	IsCacheable(s string, asKey bool) bool 
+	Write(string) string
+}
+
 // MatchF is an equality function protocol used by
 // sets and cmaps.
 type MatchF func(a, b interface{}) bool

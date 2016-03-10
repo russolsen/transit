@@ -20,7 +20,6 @@ package transit
 
 import (
 	"fmt"
-	"log"
 	"testing"
 	"container/list"
 )
@@ -138,21 +137,9 @@ func makeBigNestedMap(size int) *map[Keyword]interface{} {
 
 	return &map[Keyword]interface{}{Keyword("f"): *f, Keyword("s"): *s}
 }
+
 func TestValues(t *testing.T) {
 	for exemplar, value := range exemplars {
 		Verify(t, value, ExemplarPath(exemplar))
 	}
 }
-
-func XTestCaching(t *testing.T) {
-	value := []interface{}{
-		Symbol("abcdefg"), Symbol("abcdefg"), Symbol("abc"),
-		//Keyword("abcdefg"), Keyword("abcdefg"), Keyword("abc"),
-	}
-
-	s, _ := EncodeToString(value)
-	log.Println("=======> ", s)
-	newV, _ := DecodeFromString(s)
-	log.Println("======> ", newV)
-}
-

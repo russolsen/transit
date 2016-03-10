@@ -97,8 +97,6 @@ func (d Decoder) ParseString(s string) (interface{}, error) {
 		tv := TaggedValue{TagId(s[1:2]), s[2:]}
 		return d.decoders["unknown"](d, tv)
 	}
-
-	// tbd deal with writing to cache.
 }
 
 func (d Decoder) ParseSingleEntryMap(m map[string]interface{}) (interface{}, error) {
@@ -131,7 +129,6 @@ func (d Decoder) ParseMultiEntryMap(m map[string]interface{}) (interface{}, erro
 	var result = make(map[interface{}]interface{})
 
 	for k, v := range m {
-		//d.Cache.Encache(k, true)
 		key, err := d.Parse(k, true)
 		if err != nil {
 			return nil, err
@@ -176,7 +173,6 @@ func (d Decoder) ParseCMap(x []interface{}) (interface{}, error) {
 	l := len(x)
 
 	for i := 1; i < l; i += 2 {
-		//d.Cache.Encache(x[i].(string), true)
 		key, err := d.Parse(x[i], true)
 		if err != nil {
 			return nil, err
@@ -198,7 +194,6 @@ func (d Decoder) ParseArrayMap(x []interface{}) (interface{}, error) {
 	l := len(x)
 
 	for i := 1; i < l; i += 2 {
-		//d.Cache.Encache(x[i].(string), true)
 		key, err := d.Parse(x[i], true)
 		if err != nil {
 			return nil, err

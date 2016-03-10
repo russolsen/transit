@@ -339,10 +339,13 @@ func (ie ArrayEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitEndArray()
 }
 
-type MapEncoder struct{}
+type MapEncoder struct{ 
+	verbose bool
+}
 
-func NewMapEncoder() *MapEncoder {
-	return &MapEncoder{}
+
+func NewMapEncoder(verbose bool) *MapEncoder {
+	return &MapEncoder{verbose}
 }
 
 func (me MapEncoder) IsStringable(v reflect.Value) bool {
@@ -350,13 +353,14 @@ func (me MapEncoder) IsStringable(v reflect.Value) bool {
 }
 
 func (me MapEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
-	//log.Println("Map Encoder for", v)
-
 	keys := KeyValues(v)
-	if me.allStringable(e, keys) {
-		return me.encodeNormalMap(e, v)
-	} else {
+
+	if !me.allStringable(e, keys) {
 		return me.encodeCompositeMap(e, v)
+	} else if me.verbose {
+		return me.encodeVerboseMap(e, v)
+	} else {
+		return me.encodeNormalMap(e, v)
 	}
 }
 
@@ -428,6 +432,37 @@ func (me MapEncoder) encodeNormalMap(e Encoder, v reflect.Value) error {
 	}
 
 	return e.emitter.EmitEndArray()
+}
+
+
+func (me MapEncoder) encodeVerboseMap(e Encoder, v reflect.Value) error {
+	e.emitter.EmitStartMap()
+
+	keys := KeyValues(v)
+
+	for i, key := range keys {
+		if i != 0 {
+			e.emitter.EmitMapSeparator()
+		}
+
+		err := e.EncodeValue(key, true)
+
+		if err != nil {
+			return err
+		}
+
+		e.emitter.EmitKeySeparator()
+
+		value := GetMapElement(v, key)
+
+		err = e.EncodeValue(value, false)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return e.emitter.EmitEndMap()
 }
 
 
