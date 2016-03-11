@@ -19,17 +19,17 @@
 
 package transit
 
-const START = "~"
-const RESERVED = "`"
-const SUB = "^"
+const start = "~"
+const reserved = "`"
+const sub = "^"
 
-const ESCAPE_TAG = "~~"
-const ESCAPE_SUB = "~^"
-const ESCAPE_RES = "~`"
+const escapeTag = "~~"
+const escapeSub = "~^"
+const escapeRes = "~`"
 
-const START_TAG = "~#"
-const START_SYM = "~$"
-const START_KW = "~:"
+const startTag = "~#"
+const startSym = "~$"
+const startKW = "~:"
 
-const MAP_AS_ARRAY = "^ "
+const mapAsArray = "^ "
 

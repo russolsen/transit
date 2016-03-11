@@ -22,11 +22,11 @@ package transit
 import ("fmt")
 
 
-const CACHE_CODE_DIGITS = 44
-const BASE_CHAR_INDEX = 48
-const FIRST_ORD = 48
-const CACHE_SIZE = CACHE_CODE_DIGITS * CACHE_CODE_DIGITS
-const MIN_SIZE_CACHEABLE = 4
+const cacheCodeDigits = 44
+const baseCharIndex = 48
+const firstOrd = 48
+const cacheSize = cacheCodeDigits * cacheCodeDigits
+const minSizeCacheable = 4
 
 type StringMap map[string]string
 
@@ -77,14 +77,14 @@ func (rc RollingCache) Write(name string) string {
 // and either asKey is true or the string represents a symbol, keyword
 // or tag.
 func (rc RollingCache) IsCacheable(s string, asKey bool) bool {
-	if len(s) < MIN_SIZE_CACHEABLE {
+	if len(s) < minSizeCacheable {
 		return false
 	} else if asKey {
 		return true
 	} else {
 		var firstTwo = s[0:2]
 		//return firstTwo == "~#" || firstTwo == "~$" || firstTwo == "~:"
-		return firstTwo == START_TAG || firstTwo == START_KW || firstTwo == START_SYM
+		return firstTwo == startTag || firstTwo == startKW || firstTwo == startSym
 	}
 }
 
@@ -92,7 +92,7 @@ func (rc RollingCache) IsCacheable(s string, asKey bool) bool {
 func (rc RollingCache) IsCacheKey(name string) bool {
 	if len(name) == 0 {
 		return false
-	} else if (name[0:1] == SUB) && (name != MAP_AS_ARRAY) {
+	} else if (name[0:1] == sub) && (name != mapAsArray) {
 		return true
 	} else {
 		return false
@@ -100,26 +100,26 @@ func (rc RollingCache) IsCacheKey(name string) bool {
 }
 
 func (rc RollingCache) encodeKey(index int) string {
-	var hi = index / CACHE_CODE_DIGITS
-	var lo = index % CACHE_CODE_DIGITS
+	var hi = index / cacheCodeDigits
+	var lo = index % cacheCodeDigits
 	if hi == 0 {
-		return SUB + string(lo+BASE_CHAR_INDEX)
+		return sub + string(lo+baseCharIndex)
 	} else {
-		return SUB + string(hi+BASE_CHAR_INDEX) + string(lo+BASE_CHAR_INDEX)
+		return sub + string(hi+baseCharIndex) + string(lo+baseCharIndex)
 	}
 }
 
 func (rc RollingCache) codeToIndex(s string) int {
 	var sz = len(s)
 	if sz == 2 {
-		return int(s[1]) - BASE_CHAR_INDEX
+		return int(s[1]) - baseCharIndex
 	} else {
-		return ((int(s[1]) - BASE_CHAR_INDEX) * CACHE_CODE_DIGITS) + (int(s[2]) - BASE_CHAR_INDEX)
+		return ((int(s[1]) - baseCharIndex) * cacheCodeDigits) + (int(s[2]) - baseCharIndex)
 	}
 }
 
 func (rc RollingCache) isCacheFull() bool {
-	return len(rc.keyToValue) > CACHE_SIZE
+	return len(rc.keyToValue) > cacheSize
 }
 
 func (rc RollingCache) Clear() {

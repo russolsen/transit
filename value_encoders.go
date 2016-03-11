@@ -270,7 +270,7 @@ func (ie StringEncoder) needsEscape(s string) bool {
 
 	firstCh := s[0:1]
 
-	return firstCh == START || firstCh == RESERVED || firstCh == SUB
+	return firstCh == start || firstCh == reserved || firstCh == sub 
 }
 
 func (ie StringEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {

@@ -79,18 +79,18 @@ func (d Decoder) ParseString(s string) (interface{}, error) {
 	if d.Cache.HasKey(s) {
 		return d.Parse(d.Cache.Read(s), false)
 
-	} else if ! strings.HasPrefix(s, START) {
+	} else if ! strings.HasPrefix(s, start) {
 		return s, nil
 
-	} else if strings.HasPrefix(s, START_TAG) {
+	} else if strings.HasPrefix(s, startTag) {
 		return TagId(s[2:]), nil
 
 	} else if vd := d.decoders[s[1:2]]; vd != nil {
 		return vd(d, s[2:])
 
-	} else if strings.HasPrefix(s, ESCAPE_TAG) || 
-		strings.HasPrefix(s, ESCAPE_SUB) || 
-		strings.HasPrefix(s, ESCAPE_RES) {
+	} else if strings.HasPrefix(s, escapeTag) || 
+		strings.HasPrefix(s, escapeSub) || 
+		strings.HasPrefix(s, escapeRes) {
 		return s[1:], nil
 
 	} else {
@@ -231,7 +231,7 @@ func (d Decoder) ParseArray(x []interface{}) (interface{}, error) {
 	}
 
 
-	if e0 == MAP_AS_ARRAY {
+	if e0 == mapAsArray {
 		return d.ParseArrayMap(x)
 	}
 
