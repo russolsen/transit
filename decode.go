@@ -73,7 +73,7 @@ func (d Decoder) AddHandler(tag string, valueDecoder Handler) {
 	d.decoders[tag] = valueDecoder
 }
 
-func (d Decoder) ParseString(s string) (interface{}, error) {
+func (d Decoder) parseString(s string) (interface{}, error) {
 
 	if d.Cache.HasKey(s) {
 		return d.Parse(d.Cache.Read(s), false)
@@ -98,7 +98,7 @@ func (d Decoder) ParseString(s string) (interface{}, error) {
 	}
 }
 
-func (d Decoder) ParseSingleEntryMap(m map[string]interface{}) (interface{}, error) {
+func (d Decoder) parseSingleEntryMap(m map[string]interface{}) (interface{}, error) {
 	// The loop here is just a convenient way to get at the only
 	// entry in the map.
 	for k, v := range m {
@@ -124,7 +124,7 @@ func (d Decoder) ParseSingleEntryMap(m map[string]interface{}) (interface{}, err
 	return nil, nil // Should never get here
 }
 
-func (d Decoder) ParseMultiEntryMap(m map[string]interface{}) (interface{}, error) {
+func (d Decoder) parseMultiEntryMap(m map[string]interface{}) (interface{}, error) {
 	var result = make(map[interface{}]interface{})
 
 	for k, v := range m {
@@ -144,15 +144,15 @@ func (d Decoder) ParseMultiEntryMap(m map[string]interface{}) (interface{}, erro
 	return result, nil
 }
 
-func (d Decoder) ParseMap(m map[string]interface{}) (interface{}, error) {
+func (d Decoder) parseMap(m map[string]interface{}) (interface{}, error) {
 	if len(m) != 1 {
-		return d.ParseMultiEntryMap(m)
+		return d.parseMultiEntryMap(m)
 	} else {
-		return d.ParseSingleEntryMap(m)
+		return d.parseSingleEntryMap(m)
 	}
 }
 
-func (d Decoder) ParseNormalArray(x []interface{}) (interface{}, error) {
+func (d Decoder) parseNormalArray(x []interface{}) (interface{}, error) {
 	var result = make([]interface{}, len(x))
 
 	for i, v := range x {
@@ -166,7 +166,7 @@ func (d Decoder) ParseNormalArray(x []interface{}) (interface{}, error) {
 	return result, nil
 }
 
-func (d Decoder) ParseCMap(x []interface{}) (interface{}, error) {
+func (d Decoder) parseCMap(x []interface{}) (interface{}, error) {
 	var result = NewCMap()
 
 	l := len(x)
@@ -187,7 +187,7 @@ func (d Decoder) ParseCMap(x []interface{}) (interface{}, error) {
 	return result, nil
 }
 
-func (d Decoder) ParseArrayMap(x []interface{}) (interface{}, error) {
+func (d Decoder) parseArrayMap(x []interface{}) (interface{}, error) {
 	result := make(map[interface{}]interface{})
 
 	l := len(x)
@@ -218,7 +218,7 @@ func (d Decoder) DecoderFor(tagid TagId) Handler {
 	return handler
 }
 
-func (d Decoder) ParseArray(x []interface{}) (interface{}, error) {
+func (d Decoder) parseArray(x []interface{}) (interface{}, error) {
 	if len(x) == 0 {
 		return x, nil
 	}
@@ -230,7 +230,7 @@ func (d Decoder) ParseArray(x []interface{}) (interface{}, error) {
 	}
 
 	if e0 == mapAsArray {
-		return d.ParseArrayMap(x)
+		return d.parseArrayMap(x)
 	}
 
 	if tagId, isTag := e0.(TagId); isTag {
@@ -245,10 +245,10 @@ func (d Decoder) ParseArray(x []interface{}) (interface{}, error) {
 		return valueDecoder(d, tv)
 	}
 
-	return d.ParseNormalArray(x)
+	return d.parseNormalArray(x)
 }
 
-func (d Decoder) ParseNumber(x json.Number) (interface{}, error) {
+func (d Decoder) parseNumber(x json.Number) (interface{}, error) {
 	var s = x.String()
 	var err error
 
@@ -275,10 +275,10 @@ func (d Decoder) Parse(x interface{}, asKey bool) (interface{}, error) {
 		return v, nil
 
 	case json.Number:
-		return d.ParseNumber(v)
+		return d.parseNumber(v)
 
 	case string:
-		result, err := d.ParseString(v)
+		result, err := d.parseString(v)
 
 		if err == nil && d.Cache.IsCacheable(v, asKey) {
 			d.Cache.Write(v)
@@ -286,10 +286,10 @@ func (d Decoder) Parse(x interface{}, asKey bool) (interface{}, error) {
 		return result, err
 
 	case map[string]interface{}:
-		return d.ParseMap(v)
+		return d.parseMap(v)
 
 	case []interface{}:
-		return d.ParseArray(v)
+		return d.parseArray(v)
 	}
 }
 
