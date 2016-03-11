@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -21,11 +21,11 @@ package transit
 import (
 	"bytes"
 	"container/list"
+	"github.com/pborman/uuid"
 	"io"
+	"math/big"
 	"net/url"
 	"reflect"
-	"math/big"
-	"github.com/pborman/uuid"
 	"time"
 )
 
@@ -186,7 +186,7 @@ func (e Encoder) Encode(x interface{}) error {
 
 	if valueEncoder.IsStringable(v) {
 		x = TaggedValue{TagId("'"), x}
-	} 
+	}
 
 	return e.EncodeInterface(x, false)
 }

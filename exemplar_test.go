@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -19,9 +19,9 @@
 package transit
 
 import (
+	"container/list"
 	"fmt"
 	"testing"
-	"container/list"
 )
 
 var exemplars map[string]interface{}
@@ -37,11 +37,10 @@ func init() {
 
 	exemplars["one.json"] = 1
 	exemplars["zero.json"] = 0
-	
+
 	exemplars["one_string.json"] = "hello"
 	exemplars["one_symbol.json"] = Symbol("hello")
 	exemplars["one_keyword.json"] = Keyword("hello")
-
 
 	exemplars["vector_empty.json"] = []interface{}{}
 	exemplars["list_empty.json"] = list.New()

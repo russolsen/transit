@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -21,12 +21,12 @@ package transit
 import (
 	"container/list"
 	"fmt"
+	"github.com/pborman/uuid"
 	"log"
-	"net/url"
-	"reflect"
 	"math"
 	"math/big"
-	"github.com/pborman/uuid"
+	"net/url"
+	"reflect"
 	"time"
 )
 
@@ -51,7 +51,6 @@ func (ie NilEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitNil(asKey)
 }
 
-
 type RuneEncoder struct{}
 
 func NewRuneEncoder() *RuneEncoder {
@@ -66,7 +65,6 @@ func (ie RuneEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	r := v.Interface().(rune)
 	return e.emitter.EmitString(fmt.Sprintf("~c%c", r), asKey)
 }
-
 
 type PointerEncoder struct{}
 
@@ -83,7 +81,6 @@ func (ie PointerEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.EncodeInterface(v.Elem().Interface(), asKey)
 }
 
-
 type UuidEncoder struct{}
 
 func NewUuidEncoder() *UuidEncoder {
@@ -98,7 +95,6 @@ func (ie UuidEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	u := v.Interface().(uuid.UUID)
 	return e.emitter.EmitString(fmt.Sprintf("~u%v", u.String()), asKey)
 }
-
 
 type TimeEncoder struct{}
 
@@ -117,8 +113,6 @@ func (ie TimeEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitString(fmt.Sprintf("~m%d", millis), asKey)
 }
 
-
-
 type BoolEncoder struct{}
 
 func NewBoolEncoder() *BoolEncoder {
@@ -133,8 +127,6 @@ func (ie BoolEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	b := v.Bool()
 	return e.emitter.EmitBool(b, asKey)
 }
-
-
 
 type FloatEncoder struct{}
 
@@ -159,8 +151,6 @@ func (ie FloatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	}
 }
 
-
-
 type BigDecimalEncoder struct{}
 
 func NewBigDecimalEncoder() *BigDecimalEncoder {
@@ -176,7 +166,6 @@ func (ie BigDecimalEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error
 	return e.emitter.EmitString(f.Text('f', 25), asKey)
 }
 
-
 type BigIntEncoder struct{}
 
 func NewBigIntEncoder() *BigIntEncoder {
@@ -191,7 +180,6 @@ func (ie BigIntEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	i := v.Interface().(big.Int)
 	return e.emitter.EmitString(fmt.Sprintf("~n%v", i.String()), asKey)
 }
-
 
 type IntEncoder struct{}
 
@@ -270,12 +258,12 @@ func (ie StringEncoder) needsEscape(s string) bool {
 
 	firstCh := s[0:1]
 
-	return firstCh == start || firstCh == reserved || firstCh == sub 
+	return firstCh == start || firstCh == reserved || firstCh == sub
 }
 
 func (ie StringEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	s := v.String()
-	if ie.needsEscape(s){
+	if ie.needsEscape(s) {
 		s = "~" + s
 	}
 	return e.emitter.EmitString(s, asKey)
@@ -339,10 +327,9 @@ func (ie ArrayEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitEndArray()
 }
 
-type MapEncoder struct{ 
+type MapEncoder struct {
 	verbose bool
 }
-
 
 func NewMapEncoder(verbose bool) *MapEncoder {
 	return &MapEncoder{verbose}
@@ -434,7 +421,6 @@ func (me MapEncoder) encodeNormalMap(e Encoder, v reflect.Value) error {
 	return e.emitter.EmitEndArray()
 }
 
-
 func (me MapEncoder) encodeVerboseMap(e Encoder, v reflect.Value) error {
 	e.emitter.EmitStartMap()
 
@@ -465,8 +451,6 @@ func (me MapEncoder) encodeVerboseMap(e Encoder, v reflect.Value) error {
 	return e.emitter.EmitEndMap()
 }
 
-
-
 type TaggedValueEncoder struct{}
 
 func NewTaggedValueEncoder() *TaggedValueEncoder {
@@ -486,7 +470,6 @@ func (ie TaggedValueEncoder) Encode(e Encoder, v reflect.Value, asKey bool) erro
 	e.EncodeInterface(t.Value, asKey)
 	return e.emitter.EmitEndArray()
 }
-
 
 type SetEncoder struct{}
 
@@ -542,7 +525,7 @@ func (ie ListEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	e.emitter.EmitTag("list")
 	e.emitter.EmitArraySeparator()
 	e.emitter.EmitStartArray()
-	
+
 	first := true
 	for element := lst.Front(); element != nil; element = element.Next() {
 		if first {
@@ -553,7 +536,7 @@ func (ie ListEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 
 		err := e.EncodeInterface(element.Value, asKey)
 		if err != nil {
-log.Println("ERRRROR", err)
+			log.Println("ERRRROR", err)
 			return err
 		}
 	}
@@ -616,9 +599,9 @@ func (ie LinkEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	e.emitter.EmitArraySeparator()
 
 	m := map[string]interface{}{
-		"href": link.Href,
-		"rel": link.Rel,
-		"name": link.Name,
+		"href":   link.Href,
+		"rel":    link.Rel,
+		"name":   link.Name,
 		"prompt": link.Prompt,
 		"render": link.Render,
 	}

@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -18,19 +18,17 @@
 
 package transit
 
-
 // NoopCache is a do-nothing implementation of a cache.
-type NoopCache struct {}
+type NoopCache struct{}
 
 func NewNoopCache() *NoopCache {
 	return &NoopCache{}
 }
 
-func (c *NoopCache)IsCacheable(s string, asKey bool) bool {
+func (c *NoopCache) IsCacheable(s string, asKey bool) bool {
 	return false
 }
 
-func (c *NoopCache)Write(s string) string {
+func (c *NoopCache) Write(s string) string {
 	return s
 }
-

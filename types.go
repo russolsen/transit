@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -18,12 +18,14 @@
 
 package transit
 
-import("fmt")
+import (
+	"fmt"
+)
 
 // Cache is the interface for (obviously) caches. Implemented
 // by RollingCache and NoopCache.
 type Cache interface {
-	IsCacheable(s string, asKey bool) bool 
+	IsCacheable(s string, asKey bool) bool
 	Write(string) string
 }
 
@@ -31,17 +33,14 @@ type Cache interface {
 // sets and cmaps.
 type MatchF func(a, b interface{}) bool
 
-
 // Matches keys with a simple == test. Satisfies the
 // MatchF protocol.
 func Equals(a, b interface{}) bool {
 	return a == b
 }
 
-
 // A tag id represents a #tag in the transit protocol.
 type TagId string
-
 
 func (t TagId) String() string {
 	return fmt.Sprintf("[Tag: %s]", string(t))
@@ -66,7 +65,6 @@ func (k Keyword) String() string {
 	return fmt.Sprintf(":%s", string(k))
 }
 
-
 // A Symbol is a transit symbol, really just a string by another type.
 type Symbol string
 
@@ -77,4 +75,3 @@ func NewSymbol(s string) Symbol {
 func (s Symbol) String() string {
 	return string(s)
 }
-

@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -18,7 +18,9 @@
 
 package transit
 
-import("fmt")
+import (
+	"fmt"
+)
 
 // A set is a very simple minded representation of a set, one that
 // does not enforce any redundancy constraints. Just a box
@@ -39,7 +41,7 @@ func (s Set) String() string {
 	return fmt.Sprintf("Set[%v]: %v", len(s.Contents), s.Contents)
 }
 
-func (s Set)Contains(value interface{}, mf MatchF) bool {
+func (s Set) Contains(value interface{}, mf MatchF) bool {
 	for _, element := range s.Contents {
 		if mf(element, value) {
 			return true
@@ -48,7 +50,6 @@ func (s Set)Contains(value interface{}, mf MatchF) bool {
 	return false
 }
 
-func (s Set)ContainsEq(value interface{}) bool {
+func (s Set) ContainsEq(value interface{}) bool {
 	return s.Contains(value, Equals)
 }
-

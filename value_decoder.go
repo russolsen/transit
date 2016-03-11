@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -53,7 +53,7 @@ func DecodeCMap(d Decoder, x interface{}) (interface{}, error) {
 
 	tagged := x.(TaggedValue)
 
-	if ! IsGenericArray(tagged.Value) {
+	if !IsGenericArray(tagged.Value) {
 		return nil, NewTransitError("Cmap contents are not an array.", tagged)
 	}
 
@@ -79,7 +79,7 @@ func DecodeCMap(d Decoder, x interface{}) (interface{}, error) {
 // DecodeSet decodes a transit set into a transit.Set instance.
 func DecodeSet(d Decoder, x interface{}) (interface{}, error) {
 	tagged := x.(TaggedValue)
-	if ! IsGenericArray(tagged.Value) {
+	if !IsGenericArray(tagged.Value) {
 		return nil, NewTransitError("Set contents are not an array.", tagged)
 	}
 	values := (tagged.Value).([]interface{})
@@ -90,7 +90,7 @@ func DecodeSet(d Decoder, x interface{}) (interface{}, error) {
 // DecodeList decodes a transit list into a Go list.
 func DecodeList(d Decoder, x interface{}) (interface{}, error) {
 	tagged := x.(TaggedValue)
-	if ! IsGenericArray(tagged.Value) {
+	if !IsGenericArray(tagged.Value) {
 		return nil, NewTransitError("List contents are not an array.", tagged)
 	}
 	values := (tagged.Value).([]interface{})
@@ -106,7 +106,6 @@ func DecodeQuote(d Decoder, x interface{}) (interface{}, error) {
 	tagged := x.(TaggedValue)
 	return tagged.Value, nil
 }
-
 
 // DecodeRFC3339 decodes a time value into a Go time instance.
 // TBD not 100% this covers all possible values.
@@ -143,7 +142,7 @@ func DecodeBigInteger(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	result := new(big.Int)
 	_, good := result.SetString(s, 10)
-	if ! good {
+	if !good {
 		return nil, &TransitError{Message: "Unable to part big integer: " + s}
 	}
 	return result, nil
@@ -176,7 +175,7 @@ func toBigInt(x interface{}) (*big.Int, error) {
 // DecodeRatio decodes a transit ratio into a Go big.Rat.
 func DecodeRatio(d Decoder, x interface{}) (interface{}, error) {
 	tagged := x.(TaggedValue)
-	if ! IsGenericArray(tagged.Value) {
+	if !IsGenericArray(tagged.Value) {
 		return nil, NewTransitError("Ratio contents are not an array.", tagged)
 	}
 
@@ -218,9 +217,8 @@ func DecodeDecimal(d Decoder, x interface{}) (interface{}, error) {
 func DecodeBigDecimal(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	result, _, err := big.ParseFloat(s, 10, 25, big.ToZero)
-	return result, err 
+	return result, err
 }
-
 
 // DecodeRatio decodes a transit null/nil.
 func DecodeNil(d Decoder, x interface{}) (interface{}, error) {
@@ -260,7 +258,7 @@ func DecodeUUID(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	var u = uuid.Parse(s)
 	if u == nil {
-		return nil, &TransitError{Message: "Unable to parse uuid [" + s + "]"}	
+		return nil, &TransitError{Message: "Unable to parse uuid [" + s + "]"}
 	}
 	return u, nil
 }

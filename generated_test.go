@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -19,9 +19,9 @@
 package transit
 
 import (
-	"github.com/russolsen/ohyeah"
-	"github.com/pborman/uuid"
 	"container/list"
+	"github.com/pborman/uuid"
+	"github.com/russolsen/ohyeah"
 	"testing"
 )
 
@@ -32,16 +32,15 @@ var Uuids = []interface{}{
 	uuid.Parse("D5E0D599-83F1-47E9-9A27-73E4131590D8"),
 	uuid.Parse("D5E0D599-83F1-47E9-9A27-73E4131590E8")}
 
-func UuidGen(r ohyeah.Int64F,) ohyeah.Generator {
+func UuidGen(r ohyeah.Int64F) ohyeah.Generator {
 	return ohyeah.ElementGen(r, Uuids)
 }
-
 
 var Numbers = []interface{}{
 	int8(8), int16(16), int32(32), int64(64),
 	uint8(8), uint16(16), uint32(32), uint64(64)}
 
-func NumberGen(r ohyeah.Int64F,) ohyeah.Generator {
+func NumberGen(r ohyeah.Int64F) ohyeah.Generator {
 	return ohyeah.ElementGen(r, Numbers)
 }
 
@@ -67,13 +66,12 @@ func SetGen(r ohyeah.Int64F, elementGenerator ohyeah.Generator, n int) ohyeah.Ge
 	}
 }
 
-
 func ListGen(r ohyeah.Int64F, elementGenerator ohyeah.Generator, n int) ohyeah.Generator {
 	return func() interface{} {
 		n := ohyeah.IntN(r, n)
 		lst := list.New()
-		
-		for i:=0; i< n; i++ {
+
+		for i := 0; i < n; i++ {
 			lst.PushBack(elementGenerator())
 		}
 		return lst
@@ -85,7 +83,7 @@ func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
 	strg := ohyeah.ElementGen(r, names)
 	symg := ohyeah.RepeatGen(strg, 40)
 	keyg := KeywordGen(strg)
-	
+
 	return ohyeah.CycleGen(
 		ohyeah.IntGen(r),
 		ohyeah.ConstantGen(1234500),

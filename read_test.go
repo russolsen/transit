@@ -96,7 +96,7 @@ func TestReadBigDecimal(t *testing.T) {
 
 func TestReadUUID(t *testing.T) {
 	u := uuid.Parse("07886363-98EC-4266-BE51-E09539AEE2A0")
-	s := `"~u` + u.String()+ `"`
+	s := `"~u` + u.String() + `"`
 
 	from_transit := DecodeTransit(t, s).(uuid.UUID)
 	assertEquals(t, u.String(), from_transit.String())

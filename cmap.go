@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -27,7 +27,6 @@ func NewCMapEntry(key, value interface{}) *CMapEntry {
 	return &CMapEntry{Key: key, Value: value}
 }
 
-
 // CMap is used to hold maps that have composite keys (i.e. #cmap values).
 // Since Go arrays and maps cannot be used as map keys, a CMap is represented
 // here as a simple array of key/value entrys.
@@ -51,6 +50,7 @@ func (cm CMap) FindBy(key interface{}, mf MatchF) *CMapEntry {
 	}
 	return nil
 }
+
 // Find a given key in the map and return it's corresponding value.
 // The search thru the keys is done with ==, so the keys in the map
 // must be comparable.

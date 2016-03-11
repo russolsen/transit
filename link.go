@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -18,14 +18,14 @@
 
 package transit
 
-import(
+import (
 	"net/url"
 )
 
 type Link struct {
-	Href *url.URL
-	Rel string
-        Name string
+	Href   *url.URL
+	Rel    string
+	Name   string
 	Prompt string
 	Render string
 }

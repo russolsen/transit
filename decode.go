@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -15,7 +15,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 
 package transit
 
@@ -79,7 +78,7 @@ func (d Decoder) ParseString(s string) (interface{}, error) {
 	if d.Cache.HasKey(s) {
 		return d.Parse(d.Cache.Read(s), false)
 
-	} else if ! strings.HasPrefix(s, start) {
+	} else if !strings.HasPrefix(s, start) {
 		return s, nil
 
 	} else if strings.HasPrefix(s, startTag) {
@@ -88,8 +87,8 @@ func (d Decoder) ParseString(s string) (interface{}, error) {
 	} else if vd := d.decoders[s[1:2]]; vd != nil {
 		return vd(d, s[2:])
 
-	} else if strings.HasPrefix(s, escapeTag) || 
-		strings.HasPrefix(s, escapeSub) || 
+	} else if strings.HasPrefix(s, escapeTag) ||
+		strings.HasPrefix(s, escapeSub) ||
 		strings.HasPrefix(s, escapeRes) {
 		return s[1:], nil
 
@@ -118,11 +117,11 @@ func (d Decoder) ParseSingleEntryMap(m map[string]interface{}) (interface{}, err
 			valueDecoder := d.DecoderFor(tag)
 			return valueDecoder(d, tv)
 		} else {
-			return map[interface{}]interface{}{key:value}, nil
+			return map[interface{}]interface{}{key: value}, nil
 		}
 	}
 
-	return nil, nil  // Should never get here
+	return nil, nil // Should never get here
 }
 
 func (d Decoder) ParseMultiEntryMap(m map[string]interface{}) (interface{}, error) {
@@ -209,7 +208,7 @@ func (d Decoder) ParseArrayMap(x []interface{}) (interface{}, error) {
 	return result, nil
 }
 
-func (d Decoder)DecoderFor(tagid TagId)Handler {
+func (d Decoder) DecoderFor(tagid TagId) Handler {
 	key := string(tagid)
 
 	handler := d.decoders[key]
@@ -229,7 +228,6 @@ func (d Decoder) ParseArray(x []interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
 
 	if e0 == mapAsArray {
 		return d.ParseArrayMap(x)

@@ -1,5 +1,5 @@
 // Copyright 2016 Russ Olsen. All Rights Reserved.
-// 
+//
 // This code is a Go port of the Java version created and maintained by Cognitect, therefore:
 //
 // Copyright 2014 Cognitect. All Rights Reserved.
@@ -16,11 +16,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package transit
 
-import ("fmt")
-
+import (
+	"fmt"
+)
 
 const cacheCodeDigits = 44
 const baseCharIndex = 48
@@ -43,12 +43,12 @@ func (rc RollingCache) String() string {
 	return fmt.Sprintf("Cache: %v", rc.keyToValue)
 }
 
-func (rc RollingCache)HasKey(name string) bool {
+func (rc RollingCache) HasKey(name string) bool {
 	_, present := rc.keyToValue[name]
 	return present
 }
 
-func (rc RollingCache)Read(name string)string {
+func (rc RollingCache) Read(name string) string {
 	return rc.keyToValue[name]
 }
 
