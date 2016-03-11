@@ -7,8 +7,8 @@ Transit is a data format and a set of libraries for conveying values between app
 
 This implementation's major.minor version number corresponds to the version of the Transit specification it supports.
 
-Currently on the basic JSON format is implemented.
-JSON-Verbose and MessagePack is **not** implemented yet. 
+Currently on the JSON formats are implemented.
+MessagePack is **not** implemented yet. 
 
 _NOTE: Transit is a work in progress and may evolve based on feedback. As a result, while Transit is a great option for transferring data between applications, it should not yet be used for storing data durably over time. This recommendation will change when the specification is complete._
 
