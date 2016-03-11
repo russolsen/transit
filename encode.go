@@ -35,8 +35,8 @@ type Encoder struct {
 }
 
 var goListType = reflect.TypeOf(list.New())
-var keywordType = reflect.TypeOf(NewKeyword(""))
-var symbolType = reflect.TypeOf(NewSymbol(""))
+var keywordType = reflect.TypeOf(Keyword(""))
+var symbolType = reflect.TypeOf(Symbol(""))
 var cmapType = reflect.TypeOf(NewCMap())
 
 var aUrl, _ = url.Parse("http://foo.com")

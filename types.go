@@ -57,21 +57,9 @@ type TaggedValue struct {
 // A Keyword is a transit keyword, really just a string by another type.
 type Keyword string
 
-func NewKeyword(s string) Keyword {
-	return Keyword(s)
-}
-
 func (k Keyword) String() string {
 	return fmt.Sprintf(":%s", string(k))
 }
 
 // A Symbol is a transit symbol, really just a string by another type.
 type Symbol string
-
-func NewSymbol(s string) Symbol {
-	return Symbol(s)
-}
-
-func (s Symbol) String() string {
-	return string(s)
-}

@@ -112,7 +112,7 @@ func TestReadURI(t *testing.T) {
 
 func TestReadSymbol(t *testing.T) {
 	sym := DecodeTransit(t, "\"~$foo\"").(Symbol)
-	assertEquals(t, "foo", sym.String())
+	assertEquals(t, "foo", string(sym))
 }
 
 func TestReadCharacter(t *testing.T) {
