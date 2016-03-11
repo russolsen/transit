@@ -29,7 +29,7 @@ type Handler func(Decoder, interface{}) (interface{}, error)
 type Decoder struct {
 	jsd      *json.Decoder
 	decoders map[string]Handler
-	Cache    *RollingCache
+	cache    *RollingCache
 }
 
 // NewDecoder returns a new Decoder, ready to write to r.
@@ -39,7 +39,7 @@ func NewDecoder(r io.Reader) *Decoder {
 
 	decoders := make(map[string]Handler)
 
-	d := Decoder{jsd: jsd, decoders: decoders, Cache: NewRollingCache()}
+	d := Decoder{jsd: jsd, decoders: decoders, cache: NewRollingCache()}
 
 	d.AddHandler("_", DecodeNil)
 	d.AddHandler(":", DecodeKeyword)
@@ -75,8 +75,8 @@ func (d Decoder) AddHandler(tag string, valueDecoder Handler) {
 
 func (d Decoder) parseString(s string) (interface{}, error) {
 
-	if d.Cache.HasKey(s) {
-		return d.Parse(d.Cache.Read(s), false)
+	if d.cache.HasKey(s) {
+		return d.Parse(d.cache.Read(s), false)
 
 	} else if !strings.HasPrefix(s, start) {
 		return s, nil
@@ -280,8 +280,8 @@ func (d Decoder) Parse(x interface{}, asKey bool) (interface{}, error) {
 	case string:
 		result, err := d.parseString(v)
 
-		if err == nil && d.Cache.IsCacheable(v, asKey) {
-			d.Cache.Write(v)
+		if err == nil && d.cache.IsCacheable(v, asKey) {
+			d.cache.Write(v)
 		}
 		return result, err
 
