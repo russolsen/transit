@@ -163,7 +163,7 @@ func (ie BigDecimalEncoder) IsStringable(v reflect.Value) bool {
 
 func (ie BigDecimalEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	f := v.Interface().(big.Float)
-	return e.emitter.EmitString(f.Text('f', 25), asKey)
+	return e.emitter.EmitString(fmt.Sprintf("~f%v", f.Text('f', 25)), asKey)
 }
 
 type BigIntEncoder struct{}
@@ -180,6 +180,34 @@ func (ie BigIntEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	i := v.Interface().(big.Int)
 	return e.emitter.EmitString(fmt.Sprintf("~n%v", i.String()), asKey)
 }
+
+
+type BigRatEncoder struct{}
+
+func NewBigRatEncoder() *BigRatEncoder {
+	return &BigRatEncoder{}
+}
+
+func (ie BigRatEncoder) IsStringable(v reflect.Value) bool {
+	return false 
+}
+
+func (ie BigRatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	r := v.Interface().(big.Rat)
+
+	e.emitter.EmitStartArray()
+	e.emitter.EmitTag("ratio")
+	e.emitter.EmitArraySeparator()
+
+	e.emitter.EmitStartArray()
+	e.Encode(r.Num())
+	e.emitter.EmitArraySeparator()
+	e.Encode(r.Denom())
+	e.emitter.EmitEndArray()
+
+	return e.emitter.EmitEndArray()
+}
+
 
 type IntEncoder struct{}
 
