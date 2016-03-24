@@ -44,6 +44,7 @@ var urlType = reflect.TypeOf(aUrl)
 var setType = reflect.TypeOf(Set{})
 
 var timeType = reflect.TypeOf(time.Now())
+var bigRatType = reflect.TypeOf(*big.NewRat(int64(1), int64(2)))
 var bigIntType = reflect.TypeOf(*big.NewInt(int64(1)))
 var bigFloatType = reflect.TypeOf(*big.NewFloat(float64(1.)))
 var uuidType = reflect.TypeOf(uuid.NewRandom())
@@ -103,12 +104,11 @@ func NewEncoder(w io.Writer, verbose bool) *Encoder {
 	e.addHandler(reflect.Slice, arrayEncoder)
 	e.addHandler(reflect.Map, NewMapEncoder(verbose))
 
-	// Link
-
 	e.addHandler(runeType, NewRuneEncoder())
 	e.addHandler(timeType, NewTimeEncoder())
 	e.addHandler(uuidType, NewUuidEncoder())
 	e.addHandler(bigIntType, NewBigIntEncoder())
+	e.addHandler(bigRatType, NewBigRatEncoder())
 	e.addHandler(bigFloatType, NewBigDecimalEncoder())
 	e.addHandler(goListType, NewListEncoder())
 	e.addHandler(symbolType, NewSymbolEncoder())
