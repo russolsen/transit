@@ -86,6 +86,9 @@ func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
 
 	return ohyeah.CycleGen(
 		ohyeah.IntGen(r),
+		ohyeah.BigRatGen(r),
+		ohyeah.BigIntGen(r),
+		ohyeah.BigFloatGen(r),
 		ohyeah.ConstantGen(1234500),
 		ohyeah.RuneGen(r),
 		strg,
