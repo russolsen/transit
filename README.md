@@ -96,7 +96,8 @@ func WriteTransit(path string, value interface{}) {
 | set |  transit.Set | transit.Set |
 | list | container/list List | container/list List |
 | map w/ composite keys |  transit.CMap |  transit.CMap |
-| link | TBD | TBD |
+| link | transit.Link | transit.Link |
+| ratio | big.Rat | big.Rat |
 
 
 ## Copyright and License
