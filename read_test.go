@@ -24,7 +24,6 @@ import (
 	"github.com/pborman/uuid"
 	"math"
 	"math/big"
-	"net/url"
 	"testing"
 )
 
@@ -105,7 +104,7 @@ func TestReadUUID(t *testing.T) {
 }
 
 func TestReadURI(t *testing.T) {
-	from_transit := DecodeTransit(t, "\"~rhttp://www.foo.com\"").(*url.URL)
+	from_transit := DecodeTransit(t, "\"~rhttp://www.foo.com\"").(*TUri)
 	assertEquals(t, from_transit.String(), "http://www.foo.com")
 
 }

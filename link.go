@@ -18,12 +18,8 @@
 
 package transit
 
-import (
-	"net/url"
-)
-
 type Link struct {
-	Href   *url.URL
+	Href   *TUri
 	Rel    string
 	Name   string
 	Prompt string

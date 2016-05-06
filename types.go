@@ -20,6 +20,7 @@ package transit
 
 import (
 	"fmt"
+	"net/url"
 )
 
 // Cache is the interface for (obviously) caches. Implemented
@@ -63,3 +64,21 @@ func (k Keyword) String() string {
 
 // A Symbol is a transit symbol, really just a string by another type.
 type Symbol string
+
+// A TUri is just a container for a uri string. Go url.URL cannot handle all
+// of the non-ascii chars of transit uris, hence the need for this type.
+type TUri struct {
+	Value string
+}
+
+func NewTUri(x string) *TUri {
+	return &TUri{Value: x}
+}
+
+func (turi TUri) ToURL() (*url.URL, error) {
+	return url.Parse(turi.Value)
+}
+
+func (turi TUri) String() string {
+	return turi.Value
+}

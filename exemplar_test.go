@@ -87,15 +87,13 @@ func init() {
 		MakeSet(MakeSet(1, 3, 2), MakeSet(nil, 0, 2.0, "~eight", 1, true, "five", false, Symbol("seven"), Keyword("six")))
 	// */
 
-	/*
-		exemplars["uris.json"] = []*url.URL{
-			toUrl("http://example.com"),
-			toUrl("ftp://example.com"),
-			toUrl("file:///path/to/file.txt"),
-			toUrl("http://www.詹姆斯.com/"),
+		exemplars["uris.json"] = []*TUri{
+			NewTUri("http://example.com"),
+			NewTUri("ftp://example.com"),
+			NewTUri("file:///path/to/file.txt"),
+			NewTUri("http://www.詹姆斯.com/"),
 		}
 
-	*/
 
 	exemplars["maps_four_char_keyword_keys.json"] = []interface{}{
 		map[interface{}]int{Keyword("bbbb"): 2, Keyword("aaaa"): 1},

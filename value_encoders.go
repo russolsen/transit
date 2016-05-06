@@ -313,6 +313,22 @@ func (ie UrlEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitString(fmt.Sprintf("~r%s", us), asKey)
 }
 
+
+type TUriEncoder struct{}
+
+func NewTUriEncoder() *TUriEncoder {
+	return &TUriEncoder{}
+}
+
+func (ie TUriEncoder) IsStringable(v reflect.Value) bool {
+	return true
+}
+
+func (ie TUriEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	u := v.Interface().(*TUri)
+	return e.emitter.EmitString(fmt.Sprintf("~r%s", u.Value), asKey)
+}
+
 type ErrorEncoder struct{}
 
 func NewErrorEncoder() *ErrorEncoder {
@@ -393,11 +409,16 @@ func (me MapEncoder) encodeCompositeMap(e Encoder, v reflect.Value) error {
 	e.emitter.EmitStartArray()
 
 	e.emitter.EmitTag("cmap")
+	e.emitter.EmitArraySeparator()
+
+	e.emitter.EmitStartArray()
 
 	keys := KeyValues(v)
 
-	for _, key := range keys {
-		e.emitter.EmitArraySeparator()
+	for i, key := range keys {
+		if i != 0 {
+			e.emitter.EmitArraySeparator()
+		}
 
 		err := e.EncodeValue(key, true)
 
@@ -415,6 +436,7 @@ func (me MapEncoder) encodeCompositeMap(e Encoder, v reflect.Value) error {
 		}
 	}
 
+	e.emitter.EmitEndArray()
 	return e.emitter.EmitEndArray()
 }
 
@@ -589,9 +611,13 @@ func (ie CMapEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	//l := v.Len()
 	e.emitter.EmitStartArray()
 	e.emitter.EmitTag("cmap")
+	e.emitter.EmitArraySeparator()
+	e.emitter.EmitStartArray()
 
-	for _, entry := range cmap.Entries {
-		e.emitter.EmitArraySeparator()
+	for i, entry := range cmap.Entries {
+		if i != 0 {
+			e.emitter.EmitArraySeparator()
+		}
 
 		err := e.EncodeInterface(entry.Key, true)
 		if err != nil {
@@ -606,6 +632,7 @@ func (ie CMapEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 		}
 	}
 
+	e.emitter.EmitEndArray()
 	return e.emitter.EmitEndArray()
 }
 

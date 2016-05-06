@@ -24,7 +24,6 @@ import (
 	"github.com/pborman/uuid"
 	"math"
 	"math/big"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -118,7 +117,7 @@ func DecodeRFC3339(d Decoder, x interface{}) (interface{}, error) {
 // DecodeTime decodes a time value represended as millis since 1970.
 func DecodeTime(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
-	var millis, _ = strconv.ParseInt(s[2:], 10, 64)
+	var millis, _ = strconv.ParseInt(s, 10, 64)
 	var seconds = millis / 1000
 	var nanos = (millis % 1000) * 1000
 	result := time.Unix(seconds, nanos)
@@ -237,7 +236,7 @@ func DecodeLink(d Decoder, x interface{}) (interface{}, error) {
 	tv := x.(TaggedValue)
 	v := tv.Value.(map[interface{}]interface{})
 	l := NewLink()
-	l.Href = v["href"].(*url.URL)
+	l.Href = v["href"].(*TUri)
 	l.Name = v["name"].(string)
 	l.Rel = v["rel"].(string)
 	l.Prompt = v["prompt"].(string)
@@ -245,12 +244,10 @@ func DecodeLink(d Decoder, x interface{}) (interface{}, error) {
 	return l, nil
 }
 
-// DecodeURI decodes a transit URI into an instance of net/Url.
-// Despite the name, Go Urls are almost URIs.
+// DecodeURI decodes a transit URI into an instance of TUri.
 func DecodeURI(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
-	u, err := url.Parse(s)
-	return u, err
+	return NewTUri(s), nil
 }
 
 // DecodeUUID decodes a transit UUID into an instance of net/UUID

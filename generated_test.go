@@ -20,10 +20,18 @@ package transit
 
 import (
 	"container/list"
+	"time"
 	"github.com/pborman/uuid"
 	"github.com/russolsen/ohyeah"
 	"testing"
 )
+
+var Times = []interface{} {
+	time.Unix(0, 0)}
+
+func TimeGen(r ohyeah.Int64F) ohyeah.Generator {
+	return ohyeah.ElementGen(r, Times)
+}
 
 var Uuids = []interface{}{
 	uuid.Parse("6E4BA181-E528-4676-84A2-87974DEBBE90"),
@@ -96,6 +104,7 @@ func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
 		keyg,
 		NumberGen(r),
 		UuidGen(r),
+		TimeGen(r),
 		ohyeah.PatternedStringGen("val"),
 		ohyeah.ConstantGen(Keyword("hello")))
 }

@@ -32,15 +32,25 @@ type Decoder struct {
 	cache    *RollingCache
 }
 
-// NewDecoder returns a new Decoder, ready to write to r.
+// NewDecoder returns a new Decoder, ready to read from r.
 func NewDecoder(r io.Reader) *Decoder {
 	jsd := json.NewDecoder(r)
+	return NewJsonDecoder(jsd)
+}
+
+// NewDecoder returns a new Decoder, ready to read from jsr.
+func NewJsonDecoder(jsd *json.Decoder) *Decoder {
 	jsd.UseNumber()
 
 	decoders := make(map[string]Handler)
 
 	d := Decoder{jsd: jsd, decoders: decoders, cache: NewRollingCache()}
+        initHandlers(&d)
 
+	return &d
+}
+
+func initHandlers(d *Decoder) {
 	d.AddHandler("_", DecodeNil)
 	d.AddHandler(":", DecodeKeyword)
 	d.AddHandler("?", DecodeBoolean)
@@ -65,7 +75,6 @@ func NewDecoder(r io.Reader) *Decoder {
 	d.AddHandler("ratio", DecodeRatio)
 	d.AddHandler("unknown", DecodeIdentity)
 
-	return &d
 }
 
 // AddHandler adds a new handler to the decoder, allowing you to extend the types it can handle.

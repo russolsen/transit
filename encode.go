@@ -41,6 +41,8 @@ var cmapType = reflect.TypeOf(NewCMap())
 
 var aUrl, _ = url.Parse("http://foo.com")
 var urlType = reflect.TypeOf(aUrl)
+var turiType = reflect.TypeOf(NewTUri("http://example.com"))
+
 var setType = reflect.TypeOf(Set{})
 
 var timeType = reflect.TypeOf(time.Now())
@@ -116,6 +118,7 @@ func NewEncoder(w io.Writer, verbose bool) *Encoder {
 	e.addHandler(cmapType, NewCMapEncoder())
 	e.addHandler(setType, NewSetEncoder())
 	e.addHandler(urlType, NewUrlEncoder())
+	e.addHandler(turiType, NewTUriEncoder())
 	e.addHandler(linkType, NewLinkEncoder())
 
 	e.addHandler(taggedValueType, NewTaggedValueEncoder())
