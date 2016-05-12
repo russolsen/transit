@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"container/list"
 	"github.com/pborman/uuid"
+	"github.com/shopspring/decimal"
 	"io"
 	"math/big"
 	"net/url"
@@ -49,6 +50,7 @@ var timeType = reflect.TypeOf(time.Now())
 var bigRatType = reflect.TypeOf(*big.NewRat(int64(1), int64(2)))
 var bigIntType = reflect.TypeOf(*big.NewInt(int64(1)))
 var bigFloatType = reflect.TypeOf(*big.NewFloat(float64(1.)))
+var decimalType = reflect.TypeOf(decimal.NewFromFloat(3))
 var uuidType = reflect.TypeOf(uuid.NewRandom())
 var linkType = reflect.TypeOf(*NewLink())
 var taggedValueType = reflect.TypeOf(TaggedValue{TagId("#foo"), 1})
@@ -84,6 +86,9 @@ func NewEncoder(w io.Writer, verbose bool) *Encoder {
 	e.addHandler(reflect.Float32, floatEncoder)
 	e.addHandler(reflect.Float64, floatEncoder)
 
+	decimalEncoder := NewDecimalEncoder()
+	e.addHandler(decimalType, decimalEncoder)
+
 	intEncoder := NewIntEncoder()
 
 	e.addHandler(reflect.Int, intEncoder)
@@ -111,7 +116,7 @@ func NewEncoder(w io.Writer, verbose bool) *Encoder {
 	e.addHandler(uuidType, NewUuidEncoder())
 	e.addHandler(bigIntType, NewBigIntEncoder())
 	e.addHandler(bigRatType, NewBigRatEncoder())
-	e.addHandler(bigFloatType, NewBigDecimalEncoder())
+	e.addHandler(bigFloatType, NewBigFloatEncoder())
 	e.addHandler(goListType, NewListEncoder())
 	e.addHandler(symbolType, NewSymbolEncoder())
 	e.addHandler(keywordType, NewKeywordEncoder())

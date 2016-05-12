@@ -22,6 +22,7 @@ import (
 	"container/list"
 	"encoding/base64"
 	"github.com/pborman/uuid"
+	"github.com/shopspring/decimal"
 	"math"
 	"math/big"
 	"strconv"
@@ -118,9 +119,10 @@ func DecodeRFC3339(d Decoder, x interface{}) (interface{}, error) {
 func DecodeTime(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	var millis, _ = strconv.ParseInt(s, 10, 64)
-	var seconds = millis / 1000
-	var nanos = (millis % 1000) * 1000
-	result := time.Unix(seconds, nanos)
+	seconds := millis / 1000
+	remainder_millis := millis - (seconds * 1000)
+	nanos := remainder_millis * 1000000
+	result := time.Unix(seconds, nanos).UTC()
 	return result, nil
 }
 
@@ -206,17 +208,16 @@ func DecodeRune(d Decoder, x interface{}) (interface{}, error) {
 	return rune(s[0]), nil
 }
 
-// DecodeRatio decodes a transit decimal into an int64.
-func DecodeDecimal(d Decoder, x interface{}) (interface{}, error) {
+// DecodeFloat decodes the value into a float.
+func DecodeFloat(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
 	return strconv.ParseFloat(s, 64)
 }
 
-// DecodeBigDecimal decodes a transit big decimal into an float64.
-func DecodeBigDecimal(d Decoder, x interface{}) (interface{}, error) {
+// DecodeDecimal decodes a transit big decimal into decimal.Decimal.
+func DecodeDecimal(d Decoder, x interface{}) (interface{}, error) {
 	s := x.(string)
-	result, _, err := big.ParseFloat(s, 10, 25, big.ToZero)
-	return result, err
+	return decimal.NewFromString((s))
 }
 
 // DecodeRatio decodes a transit null/nil.

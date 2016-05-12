@@ -142,9 +142,9 @@ func (je JsonEmitter) EmitKeySeparator() error {
 func (je JsonEmitter) EmitBool(x bool, asKey bool) error {
 	if asKey {
 		if x {
-			return je.EmitString("?t", false)
+			return je.EmitString("~?t", false)
 		} else {
-			return je.EmitString("?f", false)
+			return je.EmitString("~?f", false)
 		}
 	} else {
 		return je.EmitBase(x)

@@ -22,6 +22,7 @@ import (
 	"container/list"
 	"fmt"
 	"github.com/pborman/uuid"
+	"github.com/shopspring/decimal"
 	"log"
 	"math"
 	"math/big"
@@ -109,7 +110,8 @@ func (ie TimeEncoder) IsStringable(v reflect.Value) bool {
 func (ie TimeEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	t := v.Interface().(time.Time)
 	nanos := t.UnixNano()
-	millis := nanos / int64(1000)
+	millis := nanos / int64(1000000)
+	//millis := t.Unix() * 1000
 	return e.emitter.EmitString(fmt.Sprintf("~m%d", millis), asKey)
 }
 
@@ -151,17 +153,32 @@ func (ie FloatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	}
 }
 
-type BigDecimalEncoder struct{}
+type DecimalEncoder struct{}
 
-func NewBigDecimalEncoder() *BigDecimalEncoder {
-	return &BigDecimalEncoder{}
+func NewDecimalEncoder() *DecimalEncoder {
+	return &DecimalEncoder{}
 }
 
-func (ie BigDecimalEncoder) IsStringable(v reflect.Value) bool {
+func (ie DecimalEncoder) IsStringable(v reflect.Value) bool {
 	return true
 }
 
-func (ie BigDecimalEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+func (ie DecimalEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	f := v.Interface().(decimal.Decimal)
+	return e.emitter.EmitString(fmt.Sprintf("~f%v", f.String()), asKey)
+}
+
+type BigFloatEncoder struct{}
+
+func NewBigFloatEncoder() *BigFloatEncoder {
+	return &BigFloatEncoder{}
+}
+
+func (ie BigFloatEncoder) IsStringable(v reflect.Value) bool {
+	return true
+}
+
+func (ie BigFloatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	f := v.Interface().(big.Float)
 	return e.emitter.EmitString(fmt.Sprintf("~f%v", f.Text('f', 25)), asKey)
 }
@@ -181,7 +198,6 @@ func (ie BigIntEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	return e.emitter.EmitString(fmt.Sprintf("~n%v", i.String()), asKey)
 }
 
-
 type BigRatEncoder struct{}
 
 func NewBigRatEncoder() *BigRatEncoder {
@@ -189,7 +205,7 @@ func NewBigRatEncoder() *BigRatEncoder {
 }
 
 func (ie BigRatEncoder) IsStringable(v reflect.Value) bool {
-	return false 
+	return false
 }
 
 func (ie BigRatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
@@ -207,7 +223,6 @@ func (ie BigRatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 
 	return e.emitter.EmitEndArray()
 }
-
 
 type IntEncoder struct{}
 
@@ -312,7 +327,6 @@ func (ie UrlEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	us := u.String()
 	return e.emitter.EmitString(fmt.Sprintf("~r%s", us), asKey)
 }
-
 
 type TUriEncoder struct{}
 
@@ -420,7 +434,7 @@ func (me MapEncoder) encodeCompositeMap(e Encoder, v reflect.Value) error {
 			e.emitter.EmitArraySeparator()
 		}
 
-		err := e.EncodeValue(key, true)
+		err := e.EncodeValue(key, false)
 
 		if err != nil {
 			return err
@@ -586,7 +600,7 @@ func (ie ListEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 
 		err := e.EncodeInterface(element.Value, asKey)
 		if err != nil {
-			log.Println("ERRRROR", err)
+			log.Println("ERROR", err)
 			return err
 		}
 	}
@@ -619,7 +633,7 @@ func (ie CMapEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 			e.emitter.EmitArraySeparator()
 		}
 
-		err := e.EncodeInterface(entry.Key, true)
+		err := e.EncodeInterface(entry.Key, false)
 		if err != nil {
 			return err
 		}

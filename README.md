@@ -83,7 +83,7 @@ func WriteTransit(path string, value interface{}) {
 | bytes| []byte | []byte |
 | keyword | transit.Keyword | transit.Keyword |
 | symbol | transit.Symbol | transit.Keyword
-| arbitrary precision decimal| big.Float | big.Float |
+| arbitrary precision decimal| big.Float or github.com/shopspring/decimal.Decimal| github.com/shopspring/decimal.Decimal |
 | arbitrary precision integer| big.Int | big.Int |
 | point in time | time.Time | time.Time |
 | point in time RFC 33339 | - | time.Time |

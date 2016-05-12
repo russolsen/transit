@@ -45,7 +45,7 @@ func NewJsonDecoder(jsd *json.Decoder) *Decoder {
 	decoders := make(map[string]Handler)
 
 	d := Decoder{jsd: jsd, decoders: decoders, cache: NewRollingCache()}
-        initHandlers(&d)
+	initHandlers(&d)
 
 	return &d
 }
@@ -55,10 +55,10 @@ func initHandlers(d *Decoder) {
 	d.AddHandler(":", DecodeKeyword)
 	d.AddHandler("?", DecodeBoolean)
 	d.AddHandler("b", DecodeByte)
-	d.AddHandler("d", DecodeDecimal)
+	d.AddHandler("d", DecodeFloat)
 	d.AddHandler("i", DecodeInteger)
 	d.AddHandler("n", DecodeBigInteger)
-	d.AddHandler("f", DecodeBigDecimal)
+	d.AddHandler("f", DecodeDecimal)
 	d.AddHandler("c", DecodeRune)
 	d.AddHandler("$", DecodeSymbol)
 	d.AddHandler("t", DecodeRFC3339)

@@ -20,13 +20,14 @@ package transit
 
 import (
 	"container/list"
-	"time"
 	"github.com/pborman/uuid"
 	"github.com/russolsen/ohyeah"
+	"github.com/shopspring/decimal"
 	"testing"
+	"time"
 )
 
-var Times = []interface{} {
+var Times = []interface{}{
 	time.Unix(0, 0)}
 
 func TimeGen(r ohyeah.Int64F) ohyeah.Generator {
@@ -66,6 +67,14 @@ func SymbolGen(stringGenerator ohyeah.Generator) ohyeah.Generator {
 	}
 }
 
+func DecimalGen(r ohyeah.Int64F) ohyeah.Generator {
+	return func() interface{} {
+		a := float64(r())
+		b := float64(r())
+		return decimal.NewFromFloat(a * b)
+	}
+}
+
 func SetGen(r ohyeah.Int64F, elementGenerator ohyeah.Generator, n int) ohyeah.Generator {
 	ag := ohyeah.ArrayGen(r, elementGenerator, n)
 	return func() interface{} {
@@ -96,7 +105,7 @@ func SimpleGen(r ohyeah.Int64F) ohyeah.Generator {
 		ohyeah.IntGen(r),
 		ohyeah.BigRatGen(r),
 		ohyeah.BigIntGen(r),
-		ohyeah.BigFloatGen(r),
+		DecimalGen(r),
 		ohyeah.ConstantGen(1234500),
 		ohyeah.RuneGen(r),
 		strg,

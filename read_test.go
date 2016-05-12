@@ -22,6 +22,7 @@ import (
 	"container/list"
 	"encoding/base64"
 	"github.com/pborman/uuid"
+	"github.com/shopspring/decimal"
 	"math"
 	"math/big"
 	"testing"
@@ -86,7 +87,7 @@ func TestReadSpecialNumbers(t *testing.T) {
 }
 
 func TestReadBigDecimal(t *testing.T) {
-	bd := DecodeTransit(t, `"~f42.5"`).(*big.Float)
+	bd := DecodeTransit(t, `"~f42.5"`).(decimal.Decimal)
 	x, _ := bd.Float64()
 	assertTrue(t, x-42.5 < 0.001)
 
