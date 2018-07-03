@@ -39,7 +39,7 @@ func NewCMap() *CMap {
 	return &CMap{}
 }
 
-// FindBy seaches thru the map, calling mf on each key in turn
+// FindBy searches thru the map, calling mf on each key in turn
 // and returns the first entry for which mf evaluates to true.
 
 func (cm CMap) FindBy(key interface{}, mf MatchF) *CMapEntry {
