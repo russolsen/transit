@@ -1,5 +1,7 @@
 # transit (go)
 
+[![GoDoc](https://godoc.org/github.com/russolsen/transit?status.svg)](https://godoc.org/github.com/russolsen/transit)
+
 Transit is a data format and a set of libraries for conveying values between applications written in different languages. This library provides support for marshalling Transit data to/from Go.
 
 * [Rationale](http://blog.cognitect.com/blog/2014/7/22/transit)
@@ -8,7 +10,7 @@ Transit is a data format and a set of libraries for conveying values between app
 This implementation's major.minor version number corresponds to the version of the Transit specification it supports.
 
 Currently on the JSON formats are implemented.
-MessagePack is **not** implemented yet. 
+MessagePack is **not** implemented yet.
 
 _NOTE: Transit is a work in progress and may evolve based on feedback. As a result, while Transit is a great option for transferring data between applications, it should not yet be used for storing data durably over time. This recommendation will change when the specification is complete._
 
@@ -92,7 +94,7 @@ func WriteTransit(path string, value interface{}) {
 | char | rune | rune |
 | special numbers | As defined by math NaN and math.Inf() | TBD
 | array | arrays or slices | []interface{} |
-| map | map[interface{}]interface{} | map[interface{}]interface{} | 
+| map | map[interface{}]interface{} | map[interface{}]interface{} |
 | set |  transit.Set | transit.Set |
 | list | container/list List | container/list List |
 | map w/ composite keys |  transit.CMap |  transit.CMap |
