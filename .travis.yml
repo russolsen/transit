@@ -1,0 +1,12 @@
+dist: trusty
+language: go
+
+go:
+  - 1.9.x
+  - 1.10.x
+  - master
+
+go_import_path: github.com/russolsen/transit
+
+before_script:
+  - git clone https://github.com/cognitect/transit-format
