@@ -1,6 +1,7 @@
 # transit (go)
 
 [![GoDoc](https://godoc.org/github.com/russolsen/transit?status.svg)](https://godoc.org/github.com/russolsen/transit)
+[![Build Status](https://travis-ci.org/russolsen/transit.svg?branch=master)](https://travis-ci.org/russolsen/transit)
 
 Transit is a data format and a set of libraries for conveying values between applications written in different languages. This library provides support for marshalling Transit data to/from Go.
 
