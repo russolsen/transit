@@ -21,14 +21,15 @@ package transit
 import (
 	"container/list"
 	"fmt"
-	"github.com/pborman/uuid"
-	"github.com/shopspring/decimal"
 	"log"
 	"math"
 	"math/big"
 	"net/url"
 	"reflect"
 	"time"
+
+	"github.com/pborman/uuid"
+	"github.com/shopspring/decimal"
 )
 
 // ValueEncoder is the interface for objects that know how to
@@ -211,11 +212,11 @@ func (ie BigRatEncoder) IsStringable(v reflect.Value) bool {
 func (ie BigRatEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	r := v.Interface().(big.Rat)
 
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 	e.emitter.EmitTag("ratio")
 	e.emitter.EmitArraySeparator()
 
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 	e.Encode(r.Num())
 	e.emitter.EmitArraySeparator()
 	e.Encode(r.Denom())
@@ -368,9 +369,8 @@ func (ie ArrayEncoder) IsStringable(v reflect.Value) bool {
 }
 
 func (ie ArrayEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
-	e.emitter.EmitStartArray()
-
 	l := v.Len()
+	e.emitter.EmitStartArray(int64(l))
 	for i := 0; i < l; i++ {
 		if i > 0 {
 			e.emitter.EmitArraySeparator()
@@ -420,15 +420,14 @@ func (me MapEncoder) allStringable(e Encoder, keys []reflect.Value) bool {
 }
 
 func (me MapEncoder) encodeCompositeMap(e Encoder, v reflect.Value) error {
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 
 	e.emitter.EmitTag("cmap")
 	e.emitter.EmitArraySeparator()
 
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(int64(v.Len()))
 
 	keys := KeyValues(v)
-
 	for i, key := range keys {
 		if i != 0 {
 			e.emitter.EmitArraySeparator()
@@ -455,8 +454,7 @@ func (me MapEncoder) encodeCompositeMap(e Encoder, v reflect.Value) error {
 }
 
 func (me MapEncoder) encodeNormalMap(e Encoder, v reflect.Value) error {
-	//l := v.Len()
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(int64(v.Len()) + 1)
 
 	e.emitter.EmitString("^ ", false)
 
@@ -486,7 +484,7 @@ func (me MapEncoder) encodeNormalMap(e Encoder, v reflect.Value) error {
 }
 
 func (me MapEncoder) encodeVerboseMap(e Encoder, v reflect.Value) error {
-	e.emitter.EmitStartMap()
+	e.emitter.EmitStartMap(int64(v.Len()))
 
 	keys := KeyValues(v)
 
@@ -528,7 +526,7 @@ func (ie TaggedValueEncoder) IsStringable(v reflect.Value) bool {
 func (ie TaggedValueEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	t := v.Interface().(TaggedValue)
 
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 	e.emitter.EmitTag(string(t.Tag))
 	e.emitter.EmitArraySeparator()
 	e.EncodeInterface(t.Value, asKey)
@@ -548,15 +546,11 @@ func (ie SetEncoder) IsStringable(v reflect.Value) bool {
 func (ie SetEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	s := v.Interface().(Set)
 
-	//log.Println("*** Encode set:", v)
-
-	//l := v.Len()
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 	e.emitter.EmitTag("set")
 	e.emitter.EmitArraySeparator()
 
-	e.emitter.EmitStartArray()
-
+	e.emitter.EmitStartArray(int64(len(s.Contents)))
 	for i, element := range s.Contents {
 		if i != 0 {
 			e.emitter.EmitArraySeparator()
@@ -585,11 +579,11 @@ func (ie ListEncoder) IsStringable(v reflect.Value) bool {
 func (ie ListEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	lst := v.Interface().(*list.List)
 
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 	e.emitter.EmitTag("list")
 	e.emitter.EmitArraySeparator()
-	e.emitter.EmitStartArray()
 
+	e.emitter.EmitStartArray(int64(lst.Len()))
 	first := true
 	for element := lst.Front(); element != nil; element = element.Next() {
 		if first {
@@ -623,10 +617,10 @@ func (ie CMapEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	cmap := v.Interface().(*CMap)
 
 	//l := v.Len()
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 	e.emitter.EmitTag("cmap")
 	e.emitter.EmitArraySeparator()
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(int64(len(cmap.Entries)))
 
 	for i, entry := range cmap.Entries {
 		if i != 0 {
@@ -663,7 +657,7 @@ func (ie LinkEncoder) IsStringable(v reflect.Value) bool {
 func (ie LinkEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 	link := v.Interface().(*Link)
 
-	e.emitter.EmitStartArray()
+	e.emitter.EmitStartArray(2)
 	e.emitter.EmitTag("link")
 	e.emitter.EmitArraySeparator()
 
@@ -677,4 +671,77 @@ func (ie LinkEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
 
 	e.Encode(m)
 	return e.emitter.EmitEndArray()
+}
+
+type MsgPackMapEncoder struct {
+	MapEncoder
+}
+
+func (m MsgPackMapEncoder) Encode(e Encoder, v reflect.Value, asKey bool) error {
+	keys := KeyValues(v)
+
+	if !m.allStringable(e, keys) {
+		return m.encodeCompositeMap(e, v)
+	} else {
+		return m.encodeNormalMap(e, v)
+	}
+}
+
+func (m MsgPackMapEncoder) encodeNormalMap(e Encoder, v reflect.Value) error {
+	if err := e.emitter.EmitStartMap(int64(v.Len())); err != nil {
+		return err
+	}
+
+	for _, key := range KeyValues(v) {
+		if err := e.EncodeValue(key, true); err != nil {
+			return err
+		}
+
+		value := GetMapElement(v, key)
+		if err := e.EncodeValue(value, false); err != nil {
+			return err
+		}
+	}
+
+	return e.emitter.EmitEndArray()
+}
+
+type MsgPackUUIDEncoder struct{}
+
+func (m MsgPackUUIDEncoder) IsStringable(reflect.Value) bool {
+	return false
+}
+
+func (m MsgPackUUIDEncoder) Encode(e Encoder, value reflect.Value, asKey bool) error {
+	UUID := value.Interface().(uuid.UUID)
+	_ = UUID[15]
+
+	msb := int64(0)
+	lsb := int64(0)
+	for i := 0; i < 8; i++ {
+		msb = (msb << 8) | int64(UUID[i])
+		lsb = (lsb << 8) | int64(UUID[i+8])
+	}
+
+	if err := e.emitter.EmitStartArray(2); err != nil {
+		return err
+	}
+
+	if err := e.emitter.EmitString("~#u", true); err != nil {
+		return err
+	}
+
+	if err := e.emitter.EmitStartArray(2); err != nil {
+		return err
+	}
+
+	if err := e.emitter.EmitInt(msb, false); err != nil {
+		return err
+	}
+
+	if err := e.emitter.EmitInt(lsb, true); err != nil {
+		return err
+	}
+
+	return nil
 }

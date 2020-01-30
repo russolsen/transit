@@ -77,6 +77,17 @@ func initHandlers(d *Decoder) {
 
 }
 
+// NewDecoder returns a new Decoder, ready to read from jsr.
+func NewMsgPackDecoder(jsd *json.Decoder) *Decoder {
+	jsd.UseNumber()
+
+	decoders := make(map[string]Handler)
+	d := Decoder{jsd: jsd, decoders: decoders, cache: NewRollingCache()}
+	initHandlers(&d)
+
+	return &d
+}
+
 // AddHandler adds a new handler to the decoder, allowing you to extend the types it can handle.
 func (d Decoder) AddHandler(tag string, valueDecoder Handler) {
 	d.decoders[tag] = valueDecoder

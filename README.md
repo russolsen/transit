@@ -99,6 +99,13 @@ func WriteTransit(path string, value interface{}) {
 | link | transit.Link | transit.Link |
 | ratio | big.Rat | big.Rat |
 
+## Contributing
+
+To run the round-trip tests, download transit-format from
+
+```shell script
+git clone git@github.com:cognitect/transit-format.git
+```
 
 ## Copyright and License
 Copyright © 2016 Russ Olsen

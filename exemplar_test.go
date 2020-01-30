@@ -19,9 +19,14 @@
 package transit
 
 import (
+	"bytes"
 	"container/list"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
+
+	"github.com/pborman/uuid"
 )
 
 var exemplars map[string]interface{}
@@ -32,7 +37,7 @@ func init() {
 	// /*
 	exemplars["nil.json"] = nil
 
-	exemplars["true.json"] = false
+	exemplars["false.json"] = false
 	exemplars["true.json"] = true
 
 	exemplars["one.json"] = 1
@@ -46,28 +51,32 @@ func init() {
 	exemplars["list_empty.json"] = list.New()
 	exemplars["set_empty.json"] = MakeSet()
 
+	exemplars["uuids.json"] = []interface{}{
+		uuid.Parse("5a2cbea3-e8c6-428b-b525-21239370dd55"),
+		uuid.Parse("d1dc64fa-da79-444b-9fa4-d4412f427289"),
+		uuid.Parse("501a978e-3a3e-4060-b3be-1cf2bd4b1a38"),
+		uuid.Parse("b3ba141a-a776-48e4-9fae-a28ea8571f58"),
+	}
+
 	exemplars["small_strings.json"] = []string{
 		"", "a", "ab", "abc", "abcd", "abcde", "abcdef"}
 
 	exemplars["ints.json"] = []int64{
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-		21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127}
+		21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+		41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+		61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+		81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100,
+		101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+		121, 122, 123, 124, 125, 126, 127}
 
-	exemplars["keywords.json"] = []Keyword{
-		Keyword("a"), Keyword("ab"), Keyword("abc"),
-		Keyword("abcd"), Keyword("abcde"), Keyword("a1"),
-		Keyword("b2"), Keyword("c3"), Keyword("a_b")}
+	exemplars["keywords.json"] = []Keyword{"a", "ab", "abc", "abcd", "abcde", "a1", "b2", "c3", "a_b"}
 
-	exemplars["symbols.json"] = []Symbol{
-		Symbol("a"), Symbol("ab"), Symbol("abc"),
-		Symbol("abcd"), Symbol("abcde"), Symbol("a1"),
-		Symbol("b2"), Symbol("c3"), Symbol("a_b")}
+	exemplars["symbols.json"] = []Symbol{"a", "ab", "abc", "abcd", "abcde", "a1", "b2", "c3", "a_b"}
 
-	exemplars["doubles_interesting.json"] = []float64{
-		-3.14159, 3.14159, 4.0E11, 2.998E8, 6.626E-34}
+	exemplars["doubles_interesting.json"] = []float64{-3.14159, 3.14159, 4.0E11, 2.998E8, 6.626E-34}
 
 	exemplars["vector_empty.json"] = []interface{}{}
-
 	exemplars["vector_simple.json"] = []int64{1, 2, 3}
 
 	mixed := []interface{}{0, 1, 2.0, true, false,
@@ -137,5 +146,35 @@ func makeBigNestedMap(size int) *map[Keyword]interface{} {
 func TestValues(t *testing.T) {
 	for exemplar, value := range exemplars {
 		Verify(t, value, ExemplarPath(exemplar))
+	}
+}
+
+func Benchmark(b *testing.B) {
+	path := ExemplarPath("ints_interesting.json")
+
+	f, err := os.Open(path)
+	if err != nil {
+		b.Errorf("%v", err)
+		return
+	}
+
+	byt, err := ioutil.ReadAll(f)
+	if err != nil {
+		b.Errorf("%v", err)
+		return
+	}
+
+	for i := 0; i < b.N; i++ {
+		exemplarValue, err := NewDecoder(bytes.NewReader(byt)).Decode()
+		if err != nil {
+			b.Errorf("%v", err)
+			return
+		}
+
+		_, err = EncodeToString(exemplarValue, false)
+		if err != nil {
+			b.Errorf("%v", err)
+			return
+		}
 	}
 }

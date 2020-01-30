@@ -19,10 +19,13 @@
 package transit
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/shamaton/msgpack"
 )
 
 type DataEmitter interface {
@@ -33,11 +36,11 @@ type DataEmitter interface {
 	EmitFloat(f float64, asKey bool) error
 	EmitNil(asKey bool) error
 	EmitBool(bool, asKey bool) error
-	EmitStartArray() error
+	EmitStartArray(size int64) error
 	EmitArraySeparator() error
 	EmitEndArray() error
 
-	EmitStartMap() error
+	EmitStartMap(size int64) error
 	EmitMapSeparator() error
 	EmitKeySeparator() error
 	EmitEndMap() error
@@ -111,7 +114,7 @@ func (je JsonEmitter) EmitFloat(f float64, asKey bool) error {
 	}
 }
 
-func (je JsonEmitter) EmitStartArray() error {
+func (je JsonEmitter) EmitStartArray(size int64) error {
 	return je.Emit("[")
 }
 
@@ -123,7 +126,7 @@ func (je JsonEmitter) EmitArraySeparator() error {
 	return je.Emit(",")
 }
 
-func (je JsonEmitter) EmitStartMap() error {
+func (je JsonEmitter) EmitStartMap(size int64) error {
 	return je.Emit("{")
 }
 
@@ -149,4 +152,132 @@ func (je JsonEmitter) EmitBool(x bool, asKey bool) error {
 	} else {
 		return je.EmitBase(x)
 	}
+}
+
+type MsgPackEmitter struct {
+	writer io.Writer
+	cache  Cache
+}
+
+func (m MsgPackEmitter) Emit(s string) error {
+	_, err := m.writer.Write([]byte(s))
+	return err
+}
+
+func (m MsgPackEmitter) EmitString(s string, cacheable bool) error {
+	if m.cache.IsCacheable(s, cacheable) {
+		s = m.cache.Write(s)
+	}
+
+	return m.EmitBase(s)
+}
+
+func (m MsgPackEmitter) EmitTag(s string) error {
+	return m.EmitString(fmt.Sprintf("~#%s", s), true)
+}
+
+func (m MsgPackEmitter) EmitInt(i int64, asKey bool) error {
+	return m.EmitBase(i)
+}
+
+func (m MsgPackEmitter) EmitFloat(f float64, asKey bool) error {
+	return m.EmitBase(f)
+}
+
+func (m MsgPackEmitter) EmitNil(asKey bool) error {
+	return m.EmitBase([]byte(nil))
+}
+
+func (m MsgPackEmitter) EmitBool(bool, asKey bool) error {
+	return m.EmitBase(bool)
+}
+
+func (m MsgPackEmitter) EmitStartArray(size int64) error {
+	if size < 0 {
+		panic("size is 0")
+	} else if size < 16 {
+		return m.EmitByte(byte(0x90 | size))
+	} else if size < 65536 {
+		err := m.EmitByte(byte(0xdc))
+		if err != nil {
+			return err
+		}
+
+		return m.EmitShort(uint16(size))
+	} else {
+		err := m.EmitByte(byte(0xdd))
+		if err != nil {
+			return err
+		}
+
+		return m.EmitShort(uint16(size))
+	}
+}
+
+func (m MsgPackEmitter) EmitArraySeparator() error {
+	return nil
+}
+
+func (m MsgPackEmitter) EmitEndArray() error {
+	return nil
+}
+
+func (m MsgPackEmitter) EmitStartMap(size int64) error {
+	if size < 0 {
+		panic("size is 0")
+	} else if size < 16 {
+		return m.EmitByte(byte(0x80 | size))
+	} else if size < 65536 {
+		err := m.EmitByte(byte(0xde))
+		if err != nil {
+			return err
+		}
+
+		return m.EmitShort(uint16(size))
+	} else {
+		err := m.EmitByte(byte(0xdf))
+		if err != nil {
+			return err
+		}
+
+		return m.EmitShort(uint16(size))
+	}
+}
+
+func (m MsgPackEmitter) EmitMapSeparator() error {
+	return nil
+}
+
+func (m MsgPackEmitter) EmitKeySeparator() error {
+	panic("implement me")
+}
+
+func (m MsgPackEmitter) EmitEndMap() error {
+	return nil
+}
+
+func (m MsgPackEmitter) EmitByte(v byte) error {
+	_, err := m.writer.Write([]byte{v})
+	return err
+}
+
+func (m MsgPackEmitter) EmitShort(v uint16) error {
+	var b [2]byte
+	binary.BigEndian.PutUint16(b[:], v)
+	_, err := m.writer.Write(b[:])
+	return err
+}
+
+func (m MsgPackEmitter) EmitBase(v interface{}) error {
+	b, err := msgpack.Encode(v)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.writer.Write(b)
+	return err
+}
+
+func NewMsgPackEmitter(w io.Writer, cache Cache) DataEmitter {
+	return &MsgPackEmitter{writer: w, cache: cache}
 }

@@ -19,13 +19,17 @@
 package transit
 
 import (
+	"bytes"
 	"encoding/json"
-	"github.com/russolsen/same"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
+
+	"github.com/russolsen/same"
+	"github.com/shamaton/msgpack"
 )
 
 func assertEquals(t *testing.T, v1, v2 interface{}) {
@@ -51,7 +55,7 @@ func toUrl(s string) *url.URL {
 	return url
 }
 
-func VerifyRoundTrip(t *testing.T, value interface{}) interface{} {
+func VerifyRoundTrip(t testing.TB, value interface{}) interface{} {
 
 	var newValue interface{}
 
@@ -77,7 +81,8 @@ func VerifyRoundTrip(t *testing.T, value interface{}) interface{} {
 	return newValue
 }
 
-func VerifyExemplar(t *testing.T, transitValue interface{}, exemplarPath string) {
+func VerifyExemplar(t testing.TB, transitValue interface{}, exemplarPath string) {
+	t.Helper()
 	f, err := os.Open(exemplarPath)
 
 	if err != nil {
@@ -98,6 +103,40 @@ func VerifyExemplar(t *testing.T, transitValue interface{}, exemplarPath string)
 	if !reflect.DeepEqual(exemplarValue, transitValue) {
 		t.Errorf("Value read from exemplar file [%v]:\n%v\nDoes not match round trip value:\n%v",
 			exemplarPath, exemplarValue, transitValue)
+	}
+
+	mpkg, err := os.Open(strings.Replace(exemplarPath, ".json", ".mp", 1))
+	if err != nil {
+		t.Errorf("%v", err)
+		return
+	}
+
+	msg, err := ioutil.ReadAll(mpkg)
+	if err != nil {
+		t.Errorf("%v", err)
+		return
+	}
+
+	var buf bytes.Buffer
+	if err := NewMsgPackEncoder(&buf).Encode(exemplarValue); err != nil {
+		t.Errorf("%v", err)
+		return
+	}
+
+	if buf.String() != string(msg) {
+		t.Errorf("(%s) %v, \n%v \n!= \n%v", exemplarPath, exemplarValue, buf.Bytes(), msg)
+		return
+	}
+
+	var x interface{}
+	if err = msgpack.Decode(buf.Bytes(), &x); err != nil {
+		t.Errorf("%v", err)
+		return
+	}
+
+	if !reflect.DeepEqual(x, transitValue) {
+		t.Errorf("Value read from exemplar file [%v]:\n%#v\nDoes not match round trip value:\n%#v",
+			exemplarPath, x, transitValue)
 	}
 }
 
@@ -129,7 +168,9 @@ func VerifyJson(t *testing.T, transit string, path string) error {
 	return nil
 }
 
-func Verify(t *testing.T, value interface{}, exemplarPath string) {
+func Verify(t testing.TB, value interface{}, exemplarPath string) {
+	t.Helper()
+
 	transit := VerifyRoundTrip(t, value)
 	VerifyExemplar(t, transit, exemplarPath)
 }

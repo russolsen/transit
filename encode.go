@@ -21,13 +21,14 @@ package transit
 import (
 	"bytes"
 	"container/list"
-	"github.com/pborman/uuid"
-	"github.com/shopspring/decimal"
 	"io"
 	"math/big"
 	"net/url"
 	"reflect"
 	"time"
+
+	"github.com/pborman/uuid"
+	"github.com/shopspring/decimal"
 )
 
 type Encoder struct {
@@ -114,6 +115,67 @@ func NewEncoder(w io.Writer, verbose bool) *Encoder {
 	e.addHandler(runeType, NewRuneEncoder())
 	e.addHandler(timeType, NewTimeEncoder())
 	e.addHandler(uuidType, NewUuidEncoder())
+	e.addHandler(bigIntType, NewBigIntEncoder())
+	e.addHandler(bigRatType, NewBigRatEncoder())
+	e.addHandler(bigFloatType, NewBigFloatEncoder())
+	e.addHandler(goListType, NewListEncoder())
+	e.addHandler(symbolType, NewSymbolEncoder())
+	e.addHandler(keywordType, NewKeywordEncoder())
+	e.addHandler(cmapType, NewCMapEncoder())
+	e.addHandler(setType, NewSetEncoder())
+	e.addHandler(urlType, NewUrlEncoder())
+	e.addHandler(turiType, NewTUriEncoder())
+	e.addHandler(linkType, NewLinkEncoder())
+
+	e.addHandler(taggedValueType, NewTaggedValueEncoder())
+
+	return &e
+}
+
+func NewMsgPackEncoder(w io.Writer) *Encoder {
+	emitter := NewMsgPackEmitter(w, NewRollingCache())
+
+	valueEncoders := make(map[interface{}]ValueEncoder)
+	e := Encoder{emitter: emitter, valueEncoders: valueEncoders}
+
+	e.addHandler(reflect.String, NewStringEncoder())
+
+	e.addHandler(reflect.Bool, NewBoolEncoder())
+	e.addHandler(reflect.Ptr, NewPointerEncoder())
+
+	floatEncoder := NewFloatEncoder()
+
+	e.addHandler(reflect.Float32, floatEncoder)
+	e.addHandler(reflect.Float64, floatEncoder)
+
+	decimalEncoder := NewDecimalEncoder()
+	e.addHandler(decimalType, decimalEncoder)
+
+	intEncoder := NewIntEncoder()
+
+	e.addHandler(reflect.Int, intEncoder)
+	e.addHandler(reflect.Int8, intEncoder)
+	e.addHandler(reflect.Int16, intEncoder)
+	e.addHandler(reflect.Int32, intEncoder)
+	e.addHandler(reflect.Int64, intEncoder)
+
+	uintEncoder := NewUintEncoder()
+
+	e.addHandler(reflect.Uint, uintEncoder)
+	e.addHandler(reflect.Uint8, uintEncoder)
+	e.addHandler(reflect.Uint16, uintEncoder)
+	e.addHandler(reflect.Uint32, uintEncoder)
+	e.addHandler(reflect.Uint64, uintEncoder)
+
+	arrayEncoder := NewArrayEncoder()
+
+	e.addHandler(reflect.Array, arrayEncoder)
+	e.addHandler(reflect.Slice, arrayEncoder)
+	e.addHandler(reflect.Map, MsgPackMapEncoder{})
+
+	e.addHandler(runeType, NewRuneEncoder())
+	e.addHandler(timeType, NewTimeEncoder())
+	e.addHandler(uuidType, MsgPackUUIDEncoder{})
 	e.addHandler(bigIntType, NewBigIntEncoder())
 	e.addHandler(bigRatType, NewBigRatEncoder())
 	e.addHandler(bigFloatType, NewBigFloatEncoder())
